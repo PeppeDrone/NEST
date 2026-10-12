@@ -13,9 +13,10 @@ request is the Noto Sans web font from Google Fonts.
 ```
 index.html                 the page
 static/css/                bulma.min.css (from the template), index.css (page styles)
-static/js/index.js         restricted-asset placeholders, command selector, synchronised videos
+static/js/index.js         media placeholders, command selector, synchronised videos
 static/images/             public figures (SVG), favicon, Open Graph image
-static/restricted/         RESTRICTED demonstration assets: local preview only, git-ignored
+static/videos/             demonstration videos
+static/restricted/         git-ignored, never deployed
 tools/                     scripts that build the figures and check the numbers (not needed to serve the page)
 ```
 
@@ -44,30 +45,27 @@ Opening `index.html` directly from disk also works, except that browsers may blo
   is rebuilt from the manuscript's TikZ code with the starting-pose drawing replaced by a schematic
   (`tools/build_method_figure.py`); its caption says so.
 
-## Restricted assets
+## Demonstration media
 
-Assets derived from recordings of identifiable infants (poses extracted from clinical video, generated
-trajectories anchored on them, reference stills, generated videos) are **not public** by default. They are
-built locally into `static/restricted/` (git-ignored), and the page shows a labelled placeholder wherever
-one is missing, so the deployed site never references a file that is not there.
+Media derived from the infant recordings were cleared for publication by the authors:
 
-| asset | content | page section |
+| file | content | page section |
 |---|---|---|
-| `restricted/videos/commands/*.mp4` (26) | generated 2D keypoints of one test infant under 13 commands, manual and automatic models | Teaser, Demonstrations |
-| `restricted/images/fig4_single_infant.svg` | Fig. 4: generated trajectories of one test infant | Results D |
-| `restricted/videos/stage2_sample.mp4` | control skeleton + generated video, face blurred | From trajectory to video |
-| `restricted/images/fig10_stage2.webp` | Fig. 10: reference still and generated frames (face blurred), ankle trajectories | From trajectory to video |
+| `static/videos/commands/*.mp4` (26) | generated 2D keypoints of one test infant under 13 commands, manual and automatic models | Teaser, Demonstrations |
+| `static/images/fig4_single_infant.svg` | Fig. 4: generated trajectories of one test infant | Results D |
+| `static/videos/stage2_sample.mp4` | control skeleton + generated video of test clip pz11_clip0047, face blurred | From trajectory to video |
+| `static/images/stage2_sample.webp` | the same clip in the layout of Fig. 10: reference still and generated frames (face blurred), ankle displacement | From trajectory to video |
 
-Build them (requires the private NEST analysis outputs and Stage-2 run):
+Rebuild them (requires the private analysis outputs and the Stage-2 run):
 
 ```bash
-python3 tools/build_restricted_assets.py --stage1 <stage1 folder with analysis/artifacts> \
-  --stage2-run <stage2/run folder> --figures ../manuscript/figures --stage2-clip <Fig. 10 clip id>
+python3 tools/build_restricted_assets.py --stage1 <stage1_paper> --stage2-run <stage2 run folder> \
+  --figures <manuscript/figures> --figure-code <manuscript/figure_code> --stage2-clip pz11_clip0047 \
+  --prompt-excerpt "… and its right leg and left leg with low amplitude and fast speed"
 ```
 
-**To publish an asset after it has been explicitly cleared** (ethics/consent), move it from
-`static/restricted/` to the same relative path, commit it, and adjust the `.gitignore` entry, e.g. by
-listing only the files that remain restricted. Do not commit the whole folder.
+Anything placed in `static/restricted/` stays git-ignored and is never deployed; the page shows a neutral
+placeholder if a media file fails to load.
 
 ## Deployment (GitHub Pages)
 
@@ -78,8 +76,7 @@ to run if `static/restricted/` is present.
 1. One-time setup: repository **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 2. Every push to `main` that changes `project-page/` redeploys the site (or run the workflow manually from the
    **Actions** tab). It is served at <https://peppedrone.github.io/NEST/>.
-3. Check that the placeholders appear (restricted assets are not in the repository) and that no request in
-   the browser's network panel returns 404 for a public file.
+3. Check that no request in the browser's network panel returns 404.
 
 ## When the paper, code or models become public
 

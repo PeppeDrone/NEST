@@ -1,15 +1,14 @@
-"""Build the RESTRICTED demonstration assets (local preview only; static/restricted/ is git-ignored).
+"""Build the demonstration media derived from the infant recordings (cleared for publication by the authors).
 
     python tools/build_restricted_assets.py \
         --stage1 /path/to/stage1_paper  --stage2-run /path/to/stage2/run  --figures /path/to/manuscript/figures \
-        --stage2-clip <clip id of the Fig. 10 sample>
+        --figure-code /path/to/manuscript/figure_code  --stage2-clip pz11_clip0047
 
-These assets are derived from recordings of identifiable infants (poses extracted from clinical video,
-reference stills, generated videos). They must not be published until the authors explicitly clear them;
-see README.md ("Restricted assets"). The page shows labelled placeholders when they are absent.
-
-Outputs (static/restricted/):
-  images/fig4_single_infant.svg, images/fig5_original_captions.svg, images/fig10_stage2.webp
+Outputs (static/):
+  images/fig4_single_infant.svg                       Fig. 4 of the paper
+  images/stage2_sample.webp                           reference still + generated frames every 0.5 s (face
+                                                      blurred) and leg displacement, drawn with the paper's
+                                                      Fig. 10 code for the --stage2-clip sample
   videos/commands/{manual,automatic}_<command>.mp4   skeleton animations, 13 commands x 2 caption sources,
                                                       rule-selected test infant, first sampling seed
   videos/stage2_sample.mp4                            generated video (face blurred) beside its control skeleton
@@ -22,7 +21,7 @@ from pathlib import Path
 import numpy as np
 
 SITE = Path(__file__).resolve().parents[1]
-OUT = SITE / "static" / "restricted"
+OUT = SITE / "static"
 COMMANDS = ["still"] + [f"{l}_{g}" for l in ("right_arm", "left_arm", "right_leg", "left_leg")
                         for g in ("low_slow", "high_slow", "high_fast")]
 DISTAL = {"right_arm": 4, "left_arm": 7, "right_leg": 10, "left_leg": 13}
@@ -150,14 +149,34 @@ def stage2_video(stage1, run, clip):
 
 def figures(fig_dir):
     (OUT / "images").mkdir(parents=True, exist_ok=True)
-    for name in ("fig4_single_infant", "fig5_original_captions"):
-        subprocess.run(["pdftocairo", "-svg", str(fig_dir / f"{name}.pdf"), str(OUT / "images" / f"{name}.svg")], check=True)
+    subprocess.run(["pdftocairo", "-svg", str(fig_dir / "fig4_single_infant.pdf"), str(OUT / "images" / "fig4_single_infant.svg")], check=True)
+    print("  fig4")
+
+
+def stage2_figure(figure_code, clip, excerpt=None):
+    """The paper's Fig. 10 layout (make_figures.draw_stage2_cases) for the page's sample clip."""
+    import sys
+    import tempfile
+    import pandas as pd
     from PIL import Image
-    tmp = OUT / "images" / "fig10_stage2"
-    subprocess.run(["pdftoppm", "-r", "200", "-png", "-singlefile", str(fig_dir / "fig10_stage2.pdf"), str(tmp)], check=True)
-    Image.open(f"{tmp}.png").save(OUT / "images" / "fig10_stage2.webp", quality=88, method=6)
-    Path(f"{tmp}.png").unlink()
-    print("  figures")
+    sys.path.insert(0, str(figure_code))
+    import make_figures as mf
+    folder = mf.D.ART / "stage2"
+    row = pd.read_csv(folder / "per_video.csv").set_index("clip_id").loc[clip].copy()
+    row["clip_id"] = clip
+    mf.FIG10_PROMPT_EXCERPT[clip] = excerpt or str(row.prompt)
+    req = {json.loads(l)["clip_id"]: json.loads(l) for l in (mf.STAGE2 / "stage2_requests.jsonl").read_text().splitlines() if l.strip()}
+    t, _, _ = mf.D.teacher("A")
+    tid = {c: i for i, c in enumerate(t["ids"])}
+    with tempfile.TemporaryDirectory() as tmp:
+        def save(fig, name):
+            for legend in fig.legends:                  # below the x-axis labels (tight bounding box)
+                legend.set_bbox_to_anchor((0.5, -0.02), transform=fig.transFigure)
+            fig.savefig(Path(tmp) / f"{name}.png", dpi=200, bbox_inches="tight", pad_inches=0.03)
+        mf.save = save
+        mf.draw_stage2_cases([row], "stage2_sample", folder, req, t, tid, label_ids=False)
+        Image.open(Path(tmp) / "stage2_sample.png").convert("RGB").save(OUT / "images" / "stage2_sample.webp", quality=88, method=6)
+    print("  stage2_sample.webp")
 
 
 def main():
@@ -165,11 +184,18 @@ def main():
     ap.add_argument("--stage1", required=True, type=Path, help="folder holding analysis/artifacts (test_partA, hero, stage2)")
     ap.add_argument("--stage2-run", required=True, type=Path, help="stage2 run folder (stage2_requests.jsonl, videos, bridge)")
     ap.add_argument("--figures", required=True, type=Path, help="manuscript/figures")
-    ap.add_argument("--stage2-clip", required=True, help="clip id of the Stage-2 sample shown in Fig. 10")
+    ap.add_argument("--figure-code", required=True, type=Path, help="manuscript figure_code (make_figures.py)")
+    ap.add_argument("--stage2-clip", required=True, help="clip id of the Stage-2 sample shown on the page")
+    ap.add_argument("--prompt-excerpt", help="verbatim excerpt of the prompt shown above the frames (default: full prompt)")
+    ap.add_argument("--only", choices=["figures", "commands", "stage2"], help="build one group only")
     args = ap.parse_args()
-    figures(args.figures)
-    command_videos(args.stage1)
-    stage2_video(args.stage1, args.stage2_run, args.stage2_clip)
+    if args.only in (None, "figures"):
+        figures(args.figures)
+    if args.only in (None, "commands"):
+        command_videos(args.stage1)
+    if args.only in (None, "stage2"):
+        stage2_figure(args.figure_code, args.stage2_clip, args.prompt_excerpt)
+        stage2_video(args.stage1, args.stage2_run, args.stage2_clip)
 
 
 if __name__ == "__main__":

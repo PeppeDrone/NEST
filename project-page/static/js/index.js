@@ -84,7 +84,7 @@
         if (!v) return;
         var box = v.closest(".restricted");
         if (box) box.classList.remove("is-missing");
-        v.src = "./static/restricted/videos/commands/" + arm + "_" + cmd + ".mp4";
+        v.src = "./static/videos/commands/" + arm + "_" + cmd + ".mp4";
         v.load();
         v.play().catch(function () {});
       });
