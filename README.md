@@ -10,9 +10,6 @@ label-consistent kinematic bounds. The paper compares structured manual specific
 captions on identical data, analyses the model with loss ablations, paraphrase robustness and calibration,
 and drives a frozen pose-conditioned video model with the generated trajectories.
 
-> **Naming.** During development the model was called *V7*; run names, configuration files and the
-> checkpoint format keep that name (`configs/v7.yaml`, `v7_manual_s42`, `dmtbaby.stage1.v7`). V7 is NEST.
-
 ## Repository layout
 
 ```
