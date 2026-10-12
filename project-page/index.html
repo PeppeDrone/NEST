@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEST: Controllable Neonatal Motion from a Single Frame and Sparse Movement Specifications</title>
+  <meta name="description"
+        content="NEST generates 4.75 s of 2D neonatal motion (20 frames, 20 body keypoints) from one observed pose and a sparse movement specification of limb, amplitude and speed.">
+  <meta name="keywords"
+        content="NEST, neonatal movement, infant motion generation, motion diffusion, controllable generation, classifier-free guidance, counterfactual evaluation, sparse movement specifications, pose-conditioned video">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="NEST: Controllable Neonatal Motion from a Single Frame and Sparse Movement Specifications">
+  <meta property="og:description"
+        content="Pose-anchored diffusion that turns one neonatal pose and a limb-level movement specification into a controllable 2D motion trajectory.">
+  <meta property="og:url" content="https://peppedrone.github.io/NEST/">
+  <meta property="og:image" content="https://peppedrone.github.io/NEST/static/images/og_image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="./static/images/favicon.svg" type="image/svg+xml">
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <script defer src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- ============================================================ HERO -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title"><span class="nest">NEST</span>: Controllable Neonatal Motion from a Single Frame and Sparse Movement Specifications</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block placeholder-note">Author list and affiliations will be added on publication.</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark is-unavailable" aria-disabled="true" title="The paper is not yet publicly available">
+                  <span class="icon"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm160-14.1v6.1H256V0h6.1c6.4 0 12.5 2.5 17 7l97.9 98c4.5 4.5 7 10.6 7 16.9z"/></svg></span>
+                  <span>Paper (coming soon)</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="https://github.com/PeppeDrone/NEST" title="Source code on GitHub">
+                  <span class="icon"><svg viewBox="0 0 496 512" aria-hidden="true"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8z"/></svg></span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark is-unavailable" aria-disabled="true" title="Checkpoints will be released on publication">
+                  <span class="icon"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"/></svg></span>
+                  <span>Models (coming soon)</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="#BibTeX">
+                  <span class="icon"><svg viewBox="0 0 448 512" aria-hidden="true"><path d="M0 216C0 149.7 53.7 96 120 96h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V216zm256 0c0-66.3 53.7-120 120-120h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H320c-35.3 0-64-28.7-64-64V216z"/></svg></span>
+                  <span>Citation</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TEASER -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body" style="padding-top:0">
+      <div class="teaser-flow is-main">
+        <div class="flow-box"><div class="flow-title">One observed pose</div>20 body keypoints at frame&nbsp;0, from a single photograph</div>
+        <div class="flow-arrow" aria-hidden="true">+</div>
+        <div class="flow-box"><div class="flow-title">Sparse movement specification</div><span class="spec">“the newborn moves its right arm with high amplitude and fast speed”</span></div>
+        <div class="flow-arrow" aria-hidden="true">&#8594;</div>
+        <div class="flow-box is-model">NEST</div>
+        <div class="flow-arrow" aria-hidden="true">&#8594;</div>
+        <div class="flow-box"><div class="flow-title">Controllable 2D motion</div>20 frames &middot; 20 keypoints &middot; 4.75&nbsp;s, following the commanded limb, amplitude and speed</div>
+      </div>
+      <figure class="paper-figure restricted">
+        <div class="demo-pair restricted-content">
+          <div class="demo-cell">
+            <video autoplay muted loop playsinline data-sync="teaser" preload="auto">
+              <source src="./static/restricted/videos/commands/manual_still.mp4" type="video/mp4">
+            </video>
+            <div class="demo-label">“the newborn is lying still”</div>
+          </div>
+          <div class="demo-cell">
+            <video autoplay muted loop playsinline data-sync="teaser" preload="auto">
+              <source src="./static/restricted/videos/commands/manual_right_arm_high_fast.mp4" type="video/mp4">
+            </video>
+            <div class="demo-label">“… moves its right arm with high amplitude and fast speed”</div>
+          </div>
+        </div>
+        <div class="placeholder">Demonstration pending clearance for public release: the same infant and starting pose under two commands (generated 2D keypoints only).</div>
+        <figcaption class="has-text-centered">Same starting pose, same noise, two commands: NEST moves the commanded limb (dark) and keeps the rest of the body close to its starting pose (grey).</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ABSTRACT -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Specifying how a particular newborn should move, which limb, how far and how fast, and obtaining a plausible
+            trajectory for that infant from a single photograph is an under-determined generation problem. We study whether
+            structured manual labels are a sufficient interface for it. We develop NEST (Neonatal Embodied Synthesis from Text),
+            a pose-anchored diffusion pipeline that predicts five seconds of 20-joint 2D motion from one observed pose and a
+            one-sentence description. Limb-level structure is encoded with parsed limb tokens, and training adds per-limb
+            magnitude matching and label-consistent kinematic bounds. We train NEST once with manual clinical labels and once
+            with automatic captions, on identical clips with identical sampling probabilities.
+          </p>
+          <p>
+            Controllability is evaluated with <em>paired counterfactual commands</em>: the same pose and noise are generated under
+            thirteen instructions that differ only in the commanded limb, amplitude and speed. With manual labels the model follows
+            the commands in <span class="num" data-key="succMan">0.95</span> of paired tests (amplitude
+            <span class="num" data-key="succManAmp">0.95</span>, speed <span class="num" data-key="succManSpeed">0.91</span>, limb selectivity
+            <span class="num" data-key="succManSel">0.95</span>); with automatic captions it follows amplitude but not speed or limb
+            selection (mean <span class="num" data-key="succAuto">0.62</span>; speed <span class="num" data-key="succAutoSpeed">0.38</span>,
+            selectivity <span class="num" data-key="succAutoSel">0.27</span>), a patient-level difference of
+            <span class="num" data-key="primDiff">+0.33</span> (95% CI <span class="num" data-key="primLo">+0.28</span> to
+            <span class="num" data-key="primHi">+0.38</span>) on the <span class="num" data-key="primNpat">5</span> test infants.
+            Test-set ablations show that label-consistent kinematic bounds improve speed control and suppress motion on still
+            captions, while most command adherence remains without them. Reconstruction metrics miss these differences: copying
+            the first frame has position error close to that of transferring real infant motion, although it never moves.
+            Finally, NEST trajectories drive a frozen pose-conditioned video model; each generated video follows its own trajectory
+            more closely than other trajectories.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ METHOD -->
+<section class="section is-tight">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method</h2>
+    <figure class="paper-figure">
+      <img src="./static/images/fig1_method.svg" alt="Task, NEST architecture and paired counterfactual evaluation protocol" loading="lazy">
+      <figcaption><b>Task, model and evaluation.</b> (a) From one observed pose, NEST generates 4.75&nbsp;s of motion conditioned on a sentence; every clip has a manual description compiled from a clinical form and an automatic caption. (b) NEST denoises a residual trajectory relative to the starting pose; the conditioning memory holds pose tokens, frozen CLIP text tokens, four structured limb tokens and a null token for classifier-free guidance. (c) Paired counterfactual commands. <span class="figure-source">Adapted from Fig.&nbsp;1 of the paper; the starting-pose drawing in (a) is schematic.</span></figcaption>
+    </figure>
+    <div class="content">
+      <ul>
+        <li><b>Initial pose.</b> The 20 body keypoints observed at frame&nbsp;0 anchor the generation; frame&nbsp;0 is copied, frames 1–19 are generated. Motion is represented as displacement from the starting pose in a torso-aligned frame, in body units.</li>
+        <li><b>Movement specification.</b> A one-sentence description, e.g. “the newborn moves its left leg with low amplitude and slow speed”. Manual descriptions are compiled from a structured clinical form (which limbs move, amplitude low/high, speed slow/fast).</li>
+        <li><b>Structured limb tokens.</b> A deterministic parser turns the sentence into four limb tokens (left/right arm, left/right leg), each encoding whether the limb is mentioned, moving or still, and its amplitude and speed grade; unmentioned limbs are unknown, not still. They sit next to frozen CLIP text tokens in the conditioning memory.</li>
+        <li><b>Diffusion over trajectories.</b> A factorized transformer (temporal, graph-biased joint and cross-attention; 2.1&nbsp;M parameters) predicts the clean trajectory; sampling uses 50 DDIM steps and classifier-free guidance (<i>w</i>&nbsp;=&nbsp;2).</li>
+        <li><b>Magnitude matching.</b> A per-limb loss matches each generated limb's amount of motion to the recording, independent of direction.</li>
+        <li><b>Label-consistent kinematic bounds.</b> A loss enforces bounds implied by the label: minimum amplitude for moving limbs and minimum speed for “fast”, maximum speed for “slow” and maximum amplitude for limbs described as still.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ RESULTS -->
+<section class="section is-tight">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Results</h2>
+    <div class="content">
+      <p class="lead">All results use the selected checkpoints of three training seeds per condition, evaluated with locked checkpoints and settings on held-out test infants
+      (1,203 clips in total; test split: 213 clips from 5 infants). The infant is the unit of inference; intervals are hierarchical bootstrap 95% intervals.</p>
+    </div>
+
+    <h3 class="title is-4">A. Movement command following &middot; B. Manual specifications versus automatic captions</h3>
+    <div class="keynums">
+      <div class="keynum"><div class="value"><span class="manual-c num" data-key="succMan">0.95</span> vs <span class="auto-c num" data-key="succAuto">0.62</span></div><div class="label">mean success over 16 paired tests, manual vs automatic</div></div>
+      <div class="keynum"><div class="value"><span class="num" data-key="primDiff">+0.33</span></div><div class="label">patient-level difference, 95% CI <span class="num" data-key="primLo">+0.28</span> to <span class="num" data-key="primHi">+0.38</span></div></div>
+      <div class="keynum"><div class="value"><span class="manual-c num" data-key="succManSpeed">0.91</span> vs <span class="auto-c num" data-key="succAutoSpeed">0.38</span></div><div class="label">speed ordering (fast &gt; slow)</div></div>
+      <div class="keynum"><div class="value"><span class="manual-c num" data-key="succManSel">0.95</span> vs <span class="auto-c num" data-key="succAutoSel">0.27</span></div><div class="label">limb selectivity</div></div>
+    </div>
+    <figure class="paper-figure">
+      <img src="./static/images/fig2_command_following.svg" alt="Command following, manual versus automatic labels" loading="lazy">
+      <figcaption><b>Command following, manual versus automatic labels.</b> (a) Success of the four paired tests; dots are infants, bars the mean with bootstrap 95% interval; diamonds: retrieval baseline. (b) Success per limb and test. (c) Cross-limb response: median log<sub>2</sub> speed gain of each limb when one limb is commanded high/fast; a diagonal indicates limb-selective control. (d) Dose-response of the commanded limb. <span class="figure-source">Fig.&nbsp;2 of the paper.</span></figcaption>
+    </figure>
+    <div class="content">
+      <p>On identical clips, sampling and recipe, the label interface determines what can be controlled. Both models move more under a movement command than under “still” (<span class="num" data-key="succManMoves">1.00</span> vs <span class="num" data-key="succAutoMoves">1.00</span>) and order amplitude grades (<span class="num" data-key="succManAmp">0.95</span> vs <span class="num" data-key="succAutoAmp">0.82</span>). The difference lies in speed and in which limb moves, the attributes that automatic captions never express. A retrieval baseline with manual labels reaches <span class="num" data-key="succRetMan">0.63</span>, so looking up a compatible training clip does not explain the result. With <span class="num" data-key="primNpat">5</span> test infants no per-test contrast remains significant after Holm adjustment; the evidence rests on the bootstrap intervals.</p>
+    </div>
+
+    <h3 class="title is-4">C. Behaviour on the original captions and calibration</h3>
+    <figure class="paper-figure">
+      <img src="./static/images/fig3_caption_types.svg" alt="Behaviour on the original captions by caption type" loading="lazy">
+      <figcaption><b>Original captions by caption type.</b> (a) Generated/recorded motion amplitude by caption type. (b) Single-limb captions: path length of the labelled limb versus the other limbs. (c) Distributions of per-limb kinematics on motion-captioned clips: recorded infants (black), NEST manual (blue), NEST automatic (orange). <span class="figure-source">Fig.&nbsp;3 of the paper.</span></figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table class="table compact is-narrow is-hoverable">
+        <thead><tr><th>Generated / recorded amplitude</th><th class="num">still</th><th class="num">1 limb</th><th class="num">2 limbs</th><th class="num">3–4 limbs</th></tr></thead>
+        <tbody>
+          <tr><td class="manual-c">NEST, manual labels</td><td class="num"><span class="num" data-key="ampRatioManStill">0.31</span></td><td class="num"><span class="num" data-key="ampRatioManOne">0.93</span></td><td class="num"><span class="num" data-key="ampRatioManTwo">1.38</span></td><td class="num"><span class="num" data-key="ampRatioManMulti">1.17</span></td></tr>
+          <tr><td class="auto-c">NEST, automatic captions</td><td class="num"><span class="num" data-key="ampRatioAutoStill">0.93</span></td><td class="num"><span class="num" data-key="ampRatioAutoOne">0.68</span></td><td class="num"><span class="num" data-key="ampRatioAutoTwo">0.69</span></td><td class="num"><span class="num" data-key="ampRatioAutoMulti">0.44</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="content">
+      <p>The manual model scales motion with the description: it under-moves still captions, is close to the recording on single-limb captions and over-moves multi-limb descriptions at guidance <i>w</i>&nbsp;=&nbsp;2. On single-limb captions it concentrates motion in the labelled limb (labelled/other path ratio <span class="num" data-key="selRatioMan">4.8</span>×, against <span class="num" data-key="selRatioAuto">0.7</span>× for the automatic model and <span class="num" data-key="selRatioTeach">1.0</span>× in the recordings), i.e. it follows the label more literally than the infants did. Generated amplitude tracks each infant's recorded amplitude with a log–log slope of <span class="num" data-key="calManSlope">0.93</span> for the manual model and <span class="num" data-key="calAutoSlope">0.37</span> for the automatic model; relative to the motion they generate, the automatic model's samples differ about as much as they move (relative spread <span class="num" data-key="calAutoRelSpread">1.05</span>), the manual model's are more consistent (<span class="num" data-key="calManRelSpread">0.66</span>).</p>
+    </div>
+
+    <h3 class="title is-4">D. One infant, thirteen commands</h3>
+    <figure class="paper-figure restricted">
+      <img src="./static/restricted/images/fig4_single_infant.svg" alt="One infant under thirteen commands" loading="lazy">
+      <div class="placeholder">Figure pending clearance for public release (Fig.&nbsp;4 of the paper: generated keypoint trajectories of one test infant under 13 commands).</div>
+      <figcaption><b>One infant, thirteen commands.</b> The infant and clip were selected by a stated rule (median per-infant manual success, then the median clip), not by appearance. Each panel overlays eight samples from the same starting pose; top: NEST manual, bottom: NEST automatic. <span class="figure-source">Fig.&nbsp;4 of the paper.</span></figcaption>
+    </figure>
+    <div class="content">
+      <p>For this infant the manual model moves the commanded limb <span class="num" data-key="heroSelManLo">1.3</span>–<span class="num" data-key="heroSelManHi">14.3</span> times faster than the other limbs and orders amplitude and speed; the automatic model moves the commanded limb about as much as the others (ratio <span class="num" data-key="heroSelAutoLo">0.6</span>–<span class="num" data-key="heroSelAutoHi">1.4</span>).</p>
+    </div>
+
+    <h3 class="title is-4">E. Robustness to free wording</h3>
+    <figure class="paper-figure">
+      <img src="./static/images/fig9_paraphrase.svg" alt="Free paraphrases of the test captions" loading="lazy">
+      <figcaption><b>Free paraphrases of the test captions</b> (NEST manual, one training seed). (a) Trajectory change caused by rewording, relative to the change caused by resampling the noise, for paraphrases that keep the parsed limb tokens (blue) or change them (grey). The high values for still captions whose tokens changed reflect a near-zero denominator. (b) Generated/recorded amplitude under the original caption (hollow) and the paraphrase (filled). (c) Per-clip position error. <span class="figure-source">Fig.&nbsp;6 of the paper.</span></figcaption>
+    </figure>
+    <div class="content">
+      <p>Every distinct test caption was paraphrased twice in free clinical wording (<span class="num" data-key="paraN">160</span> paraphrases, written by a language model under fixed rules and frozen before analysis); <span class="num" data-key="paraNMatch">57</span> (<span class="num" data-key="paraMatchPct">36</span>%) reduce to exactly the same limb tokens. When they do, rewording changes the trajectory about half as much as resampling the noise (ratio <span class="num" data-key="paraKeptChange">0.53</span>, 95% CI <span class="num" data-key="paraKeptChangeLo">0.36</span> to <span class="num" data-key="paraKeptChangeHi">0.73</span>) and accuracy is preserved (position error <span class="num" data-key="paraKeptErrOrig">0.108</span> vs <span class="num" data-key="paraKeptErrPara">0.118</span> body units). When they do not, generation degrades gracefully: motion still concentrates in the described limb (<span class="num" data-key="paraChangedSelPara">3.3</span>× vs <span class="num" data-key="paraChangedSelOrig">4.4</span>×), while the graded amount of motion drifts toward a default (log amplitude ratio <span class="num" data-key="paraChangeddLogAmp">−0.31</span>; calibration slope <span class="num" data-key="paraChangedSlopeOrig">0.91</span> to <span class="num" data-key="paraChangedSlopePara">0.59</span>).</p>
+    </div>
+
+    <h3 class="title is-4">F. Ablations of the training objective</h3>
+    <figure class="paper-figure">
+      <img src="./static/images/fig7_ablations.svg" alt="Ablations of NEST manual" loading="lazy">
+      <figcaption><b>Ablations of NEST manual</b> (test split, three training seeds per arm). (a) Command tests per arm. (b) Worst of the 16 cells. (c) Generated/recorded amplitude by caption type. (d) Optimizer steps until early stopping and selected step. <span class="figure-source">Fig.&nbsp;7 of the paper.</span></figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table class="table compact is-narrow is-hoverable">
+        <thead><tr><th>Arm</th><th class="num">mean success</th><th class="num">speed</th><th class="num">Δ mean vs NEST [95% CI]</th></tr></thead>
+        <tbody>
+          <tr><td>NEST (manual)</td><td class="num"><span class="num" data-key="ablFullSucc">0.95</span></td><td class="num"><span class="num" data-key="ablFullSpeed">0.91</span></td><td class="num">—</td></tr>
+          <tr><td>− label-consistent bounds</td><td class="num"><span class="num" data-key="ablLabelSucc">0.86</span></td><td class="num"><span class="num" data-key="ablLabelSpeed">0.64</span></td><td class="num"><span class="num" data-key="effLabel">−0.09</span> [<span class="num" data-key="effLabelLo">−0.11</span>, <span class="num" data-key="effLabelHi">−0.06</span>]</td></tr>
+          <tr><td>− all motion terms</td><td class="num"><span class="num" data-key="ablAllSucc">0.84</span></td><td class="num"><span class="num" data-key="ablAllSpeed">0.59</span></td><td class="num"><span class="num" data-key="effAll">−0.11</span> [<span class="num" data-key="effAllLo">−0.14</span>, <span class="num" data-key="effAllHi">−0.07</span>]</td></tr>
+          <tr><td>− magnitude matching</td><td class="num"><span class="num" data-key="ablMagSucc">0.94</span></td><td class="num"><span class="num" data-key="ablMagSpeed">0.93</span></td><td class="num">interval spans 0</td></tr>
+          <tr><td>− caption balancing</td><td class="num"><span class="num" data-key="ablBalSucc">0.95</span></td><td class="num"><span class="num" data-key="ablBalSpeed">0.94</span></td><td class="num">interval spans 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="content">
+      <p>Label-consistent bounds improve speed control and suppress motion on still captions (still-caption amplitude <span class="num" data-key="ablFullStillRatio">0.31</span> with them, <span class="num" data-key="ablLabelStillRatio">0.60</span> without, as a fraction of the recorded motion), but substantial command adherence remains without them: the bounds strengthen the response to the labels rather than accounting for most of it. Removing magnitude matching or caption balancing has small estimated effects on mean success; this does not establish equivalence.</p>
+    </div>
+
+    <h3 class="title is-4">G. Motion amount, reconstruction metrics and training dynamics</h3>
+    <figure class="paper-figure">
+      <img src="./static/images/fig6_stillness_trap.svg" alt="Motion amount and reconstruction" loading="lazy">
+      <figcaption><b>Motion amount and reconstruction.</b> (a) Fixed-noise probe (validation): motion retained in the clean-motion estimate across diffusion timesteps, with the caption (solid) and unconditional (dashed). (b) Generated/recorded amplitude over training. (c) Position error versus generated amplitude at the selected checkpoints, with static and retrieval baselines. <span class="figure-source">Fig.&nbsp;8 of the paper.</span></figcaption>
+    </figure>
+    <div class="content">
+      <p>Position error does not track controllability: copying the first frame never moves yet has error close to retrieving real infant motion (<span class="num" data-key="errStatic">0.132</span> vs <span class="num" data-key="errRetMan">0.131</span> body units), and the automatic model has lower error than the manual model (<span class="num" data-key="errAuto">0.108</span> vs <span class="num" data-key="errMan">0.124</span>) despite weaker control.</p>
+    </div>
+    <figure class="paper-figure">
+      <img src="./static/images/fig8_dynamics_guidance.svg" alt="Training dynamics and guidance" loading="lazy">
+      <figcaption><b>Training dynamics and guidance</b> (validation). (a) Command success and worst cell over training. (b) Control–accuracy trade-off across snapshots. (c) Amplitude by caption type versus guidance scale. (d) Bone-length deviation versus guidance scale. <span class="figure-source">Fig.&nbsp;9 of the paper.</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ DEMONSTRATIONS -->
+<section class="section is-tight" id="demonstrations">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Demonstrations</h2>
+    <div class="content has-text-centered">
+      <p>Same held-out infant, same starting pose and noise; only the command changes. Generated 2D keypoints of the rule-selected test infant (first sampling seed), linearly interpolated between the native frames for display.</p>
+    </div>
+    <div class="cmd-buttons" role="group" aria-label="Command">
+      <button class="button is-small is-rounded" data-cmd="still" data-prompt="the newborn is lying still">still</button>
+      <button class="button is-small is-rounded" data-cmd="right_arm_low_slow" data-prompt="the newborn moves its right arm with low amplitude and slow speed">R arm · low/slow</button>
+      <button class="button is-small is-rounded" data-cmd="right_arm_high_slow" data-prompt="the newborn moves its right arm with high amplitude and slow speed">R arm · high/slow</button>
+      <button class="button is-small is-rounded is-selected" data-cmd="right_arm_high_fast" data-prompt="the newborn moves its right arm with high amplitude and fast speed">R arm · high/fast</button>
+      <button class="button is-small is-rounded" data-cmd="left_arm_low_slow" data-prompt="the newborn moves its left arm with low amplitude and slow speed">L arm · low/slow</button>
+      <button class="button is-small is-rounded" data-cmd="left_arm_high_slow" data-prompt="the newborn moves its left arm with high amplitude and slow speed">L arm · high/slow</button>
+      <button class="button is-small is-rounded" data-cmd="left_arm_high_fast" data-prompt="the newborn moves its left arm with high amplitude and fast speed">L arm · high/fast</button>
+      <button class="button is-small is-rounded" data-cmd="right_leg_low_slow" data-prompt="the newborn moves its right leg with low amplitude and slow speed">R leg · low/slow</button>
+      <button class="button is-small is-rounded" data-cmd="right_leg_high_slow" data-prompt="the newborn moves its right leg with high amplitude and slow speed">R leg · high/slow</button>
+      <button class="button is-small is-rounded" data-cmd="right_leg_high_fast" data-prompt="the newborn moves its right leg with high amplitude and fast speed">R leg · high/fast</button>
+      <button class="button is-small is-rounded" data-cmd="left_leg_low_slow" data-prompt="the newborn moves its left leg with low amplitude and slow speed">L leg · low/slow</button>
+      <button class="button is-small is-rounded" data-cmd="left_leg_high_slow" data-prompt="the newborn moves its left leg with high amplitude and slow speed">L leg · high/slow</button>
+      <button class="button is-small is-rounded" data-cmd="left_leg_high_fast" data-prompt="the newborn moves its left leg with high amplitude and fast speed">L leg · high/fast</button>
+    </div>
+    <p class="demo-prompt" id="demo-prompt">“the newborn moves its right arm with high amplitude and fast speed”</p>
+    <div class="demo-pair">
+      <div class="demo-cell restricted">
+        <video id="demo-manual" autoplay muted playsinline preload="auto" data-sync="pair" src="./static/restricted/videos/commands/manual_right_arm_high_fast.mp4"></video>
+        <div class="placeholder">Demonstration pending clearance for public release.</div>
+        <div class="demo-label manual-c">NEST, manual labels</div>
+      </div>
+      <div class="demo-cell restricted">
+        <video id="demo-automatic" autoplay muted playsinline preload="auto" data-sync="pair" src="./static/restricted/videos/commands/automatic_right_arm_high_fast.mp4"></video>
+        <div class="placeholder">Demonstration pending clearance for public release.</div>
+        <div class="demo-label auto-c">NEST, automatic captions</div>
+      </div>
+    </div>
+    <div class="sync-controls">
+      <button class="button is-small is-rounded" data-group="pair" data-sync-action="restart">Restart</button>
+      <button class="button is-small is-rounded" data-group="pair" data-sync-action="toggle">Play / pause</button>
+    </div>
+
+    <h3 class="title is-4 has-text-centered">All thirteen commands, played in sync (NEST, manual labels)</h3>
+    <div class="restricted">
+      <div class="demo-grid restricted-content">
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_still.mp4" type="video/mp4"></video>still</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_arm_low_slow.mp4" type="video/mp4"></video>R arm · low/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_arm_high_slow.mp4" type="video/mp4"></video>R arm · high/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_arm_high_fast.mp4" type="video/mp4"></video>R arm · high/fast</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_arm_low_slow.mp4" type="video/mp4"></video>L arm · low/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_arm_high_slow.mp4" type="video/mp4"></video>L arm · high/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_arm_high_fast.mp4" type="video/mp4"></video>L arm · high/fast</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_leg_low_slow.mp4" type="video/mp4"></video>R leg · low/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_leg_high_slow.mp4" type="video/mp4"></video>R leg · high/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_right_leg_high_fast.mp4" type="video/mp4"></video>R leg · high/fast</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_leg_low_slow.mp4" type="video/mp4"></video>L leg · low/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_leg_high_slow.mp4" type="video/mp4"></video>L leg · high/slow</figure>
+        <figure><video autoplay muted playsinline preload="auto" data-sync="grid"><source src="./static/restricted/videos/commands/manual_left_leg_high_fast.mp4" type="video/mp4"></video>L leg · high/fast</figure>
+      </div>
+      <div class="placeholder">Command gallery pending clearance for public release (generated 2D keypoints of one test infant under 13 commands).</div>
+    </div>
+    <div class="sync-controls">
+      <button class="button is-small is-rounded" data-group="grid" data-sync-action="restart">Restart all</button>
+      <button class="button is-small is-rounded" data-group="grid" data-sync-action="toggle">Play / pause</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TRAJECTORY TO VIDEO -->
+<section class="section is-tight">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">From trajectory to video</h2>
+    <div class="teaser-flow">
+      <div class="flow-box"><div class="flow-title">NEST trajectory</div>20 frames of 2D keypoints for one infant and one specification</div>
+      <div class="flow-arrow" aria-hidden="true">&#8594;</div>
+      <div class="flow-box"><div class="flow-title">Bridge</div>resampled to 81 frames, anatomical constraints, rendered as skeleton control images</div>
+      <div class="flow-arrow" aria-hidden="true">&#8594;</div>
+      <div class="flow-box"><div class="flow-title">Frozen pose-conditioned video model</div>UniAnimate-DiT (Wan2.1-I2V-14B) animates the infant's first frame under the controls</div>
+    </div>
+    <div class="content">
+      <p class="notice">NEST generates <b>keypoint trajectories only</b>. The videos are synthesised by a separate, off-the-shelf video model that was not trained or adapted for infants; NEST trajectories serve as its control signal.</p>
+    </div>
+    <figure class="paper-figure restricted video-figure">
+      <video autoplay muted loop playsinline controls preload="metadata">
+        <source src="./static/restricted/videos/stage2_sample.mp4" type="video/mp4">
+      </video>
+      <div class="placeholder">Video demonstration pending clearance for public release (control skeleton from a NEST trajectory and the generated video, face blurred).</div>
+      <figcaption><b>A sample infant.</b> Left: control skeleton rendered from the NEST trajectory; right: video generated by the frozen video model from the infant's first frame (face blurred).</figcaption>
+    </figure>
+    <figure class="paper-figure restricted">
+      <img src="./static/restricted/images/fig10_stage2.webp" alt="From generated trajectory to video, a sample infant" loading="lazy">
+      <div class="placeholder">Figure pending clearance for public release (Fig.&nbsp;10 of the paper: generated video frames with blurred face and ankle trajectories).</div>
+      <figcaption><b>From generated trajectory to video.</b> Reference still and generated frames every 0.5&nbsp;s (face blurred); below: ankle displacement over time for the real infant, the NEST trajectory used as control, and the pose recovered from the generated video. <span class="figure-source">Fig.&nbsp;10 of the paper.</span></figcaption>
+    </figure>
+    <div class="content">
+      <p>Across <span class="num" data-key="stTwoN">24</span> demonstration videos from <span class="num" data-key="stTwoPatients">5</span> test infants, each video's motion was closer to its own control trajectory than to the trajectories of the other clips (motion error <span class="num" data-key="stTwoAllA">13.9</span> vs <span class="num" data-key="stTwoAllB">16.7</span> video pixels; paired difference <span class="num" data-key="stTwoAllDiff">−2.7</span>, 95% CI <span class="num" data-key="stTwoAllDiffLo">−4.2</span> to <span class="num" data-key="stTwoAllDiffHi">−1.4</span>; lower for <span class="num" data-key="stTwoAllNLower">21</span> of <span class="num" data-key="stTwoAllN">24</span> videos). For 3–4-limb descriptions the video reproduces the amount (median ratio <span class="num" data-key="stTwoMultiAmpRatio">1.02</span>) and time course (correlation <span class="num" data-key="stTwoMultiCorr">0.52</span>) of the trajectory's motion. Small single-limb motions (<span class="num" data-key="stTwoOneAmpCtrl">4.2</span>&nbsp;px) fall below the apparent motion that pose estimation produces on still videos (<span class="num" data-key="stTwoNoise">5.2</span>&nbsp;px) and cannot be resolved with this measurement. The 24 clips were screened for clean controls, so this is a demonstration, not a benchmark.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ LIMITATIONS / DATA -->
+<section class="section is-tight">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Limitations</h2>
+    <div class="content">
+      <ul>
+        <li>The recorded motion is 2D image-plane pose estimated from video at about 4&nbsp;Hz, with pose-estimator noise that is largest at the feet.</li>
+        <li>The test split contains five infants; generalisation to other units, cameras and gestational ages is untested. Historical test recordings were inspected during earlier development, so the locked evaluation is not a prospectively untouched holdout.</li>
+        <li>At guidance <i>w</i>&nbsp;=&nbsp;2 the manual model renders described motion more vigorously than the test infants performed it, and generated bone lengths vary more than recorded ones.</li>
+        <li>The comparison tests the label <em>interface</em>: automatic captions carry less information by construction, so it does not show that human annotators are better captioners in general.</li>
+        <li>No blinded clinical rating of plausibility and command adherence has been performed yet; the video demonstration uses an unadapted video model and screened clips.</li>
+      </ul>
+    </div>
+
+    <h2 class="title is-3 has-text-centered">Data and code availability</h2>
+    <div class="table-wrap">
+      <table class="table compact availability">
+        <tbody>
+          <tr><td>Code and aggregate results</td><td>Model, training, evaluation and analysis code, configurations and summary statistics: <a href="https://github.com/PeppeDrone/NEST">github.com/PeppeDrone/NEST</a>.</td></tr>
+          <tr><td>Model checkpoints</td><td>The 18 selected checkpoints (manual, automatic, four ablations × three seeds); planned for separate release on publication.</td></tr>
+          <tr><td>Clinical recordings and derived material</td><td>Neonatal videos, reference images, extracted poses and generated videos are not distributed; they are clinical data of identifiable infants. Access is subject to ethics approval.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ BIBTEX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre class="bibtex"><code>% Citation will be added on publication.</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            This website is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            It is adapted from the <a href="https://github.com/nerfies/nerfies.github.io">source code</a> of the
+            <a href="https://nerfies.github.io">Nerfies</a> project page.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

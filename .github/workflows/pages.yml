@@ -1,0 +1,38 @@
+# Publishes the project page (project-page/) to GitHub Pages. Only the files the page serves are uploaded:
+# index.html, .nojekyll and static/ (restricted assets are git-ignored and never reach the runner).
+name: Project page
+
+on:
+  push:
+    branches: [main]
+    paths: ["project-page/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp -r project-page/index.html project-page/.nojekyll project-page/static _site/
+          if [ -e _site/static/restricted ]; then echo "restricted assets must not be published" >&2; exit 1; fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
