@@ -83,6 +83,6 @@ to run if `static/restricted/` is present.
 
 ## When the paper, code or models become public
 
-Replace the remaining disabled buttons (Paper, Models) in the hero section of `index.html` (`class="... is-unavailable"`,
+Replace the remaining disabled button (Paper) in the hero section of `index.html` (`class="... is-unavailable"`,
 `aria-disabled="true"`) with real links, update the author block, the availability table and the BibTeX
 section. Keep these unavailable until the corresponding URL exists.

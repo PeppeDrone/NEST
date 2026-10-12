@@ -31,7 +31,7 @@ docs/                 EXPERIMENTS.html (all experiments explained), DATA.md, SEL
 | item | status |
 |---|---|
 | Neonatal video recordings, reference stills, extracted poses, generated trajectories and videos | **not distributed** (clinical data of identifiable infants); format in `docs/DATA.md`; access subject to ethics approval, see the paper's Data availability statement |
-| Trained checkpoints (18 selected models: manual, automatic, 4 ablations × 3 seeds) | released separately: `<DOI to be added>`; layout below |
+| Trained checkpoints (18 selected models: manual, automatic, 4 ablations × 3 seeds) | released separately: [Google Drive](https://drive.google.com/drive/folders/1BlRaFzRa4hc5OnOmqcCp1vNBXxn5VZ5T) (`NEST_checkpoints_v1.zip`); layout below |
 | UniAnimate-DiT code and Wan2.1-I2V-14B / adapter / DWPose weights | third-party; pinned commit, local patch and SHA-256 of every weight in `stage2/third_party/` |
 | CLIP ViT-L/14 text encoder | downloaded from Hugging Face at the pinned revision (`openai/clip-vit-large-patch14@32bd642`) |
 
