@@ -1,0 +1,14 @@
+# LOCKED Part-B test evaluation (PLAN.md E8): ablation arms of V7 manual. Run ONCE, after analysis/selection/selection.json has
+# been reviewed, and only if Part A confirmed manual > automatic. Selected EMA checkpoints of the
+# four ablation arms (3 seeds each); V7 manual itself comes from test_partA.
+name: test_partB
+split: test
+output_dir: analysis/artifacts/test_partB
+selection_file: analysis/selection/selection.json
+models:
+  - {runs: "abl_*", steps: selected}
+baselines: []
+stages:
+  validate: {cfg_scale: 2.0, seeds: [31415, 92653], inference_steps: 50}
+  commands: {cfg_scale: 2.0, seeds: [31415, 92653], max_clips: 213, inference_steps: 50, save_trajectories: true}
+  kinematics: {}

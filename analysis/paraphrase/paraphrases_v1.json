@@ -1,0 +1,666 @@
+{
+  "format": "neomotion.paraphrase_set.v1",
+  "version": 1,
+  "split": "test",
+  "source": "distinct manual captions of the locked test split (analysis/artifacts/test_partA/teacher/clips.csv)",
+  "author": {
+    "model": "Claude Opus 5.5",
+    "model_id": "claude-opus-5-5",
+    "provider": "Anthropic",
+    "date": "2026-10-08",
+    "procedure": "single pass, written without consulting the parser source; not edited after freezing"
+  },
+  "rules": [
+    "Preserve limb identity: the same arms, legs, hands and head as the original, no added or removed body parts.",
+    "Preserve moving/still status of every mentioned body part and the stillness of still captions.",
+    "Preserve each amplitude grade (high/low) and speed grade (fast/slow) and which body parts it applies to.",
+    "Describe the motion freely in clinically meaningful terms; do not reuse the template phrasing 'with high/low amplitude and fast/slow speed'.",
+    "Do not use General Movements Assessment categories (e.g. fidgety, writhing, cramped-synchronised) or any term that adds movement quality beyond amplitude and speed.",
+    "Keep ambiguities of the original (e.g. grades whose scope is unclear) rather than resolving them."
+  ],
+  "n_captions": 80,
+  "n_paraphrases": 160,
+  "n_test_clips": 213,
+  "items": [
+    {
+      "caption_id": "c01",
+      "original": "the newborn 's left leg moves with high amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's left leg makes large, quick movements",
+      "paraphrase_B": "wide, rapid kicking of the left leg"
+    },
+    {
+      "caption_id": "c02",
+      "original": "the newborn 's left leg moves with high amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's left leg moves slowly through a wide range",
+      "paraphrase_B": "large, unhurried movements of the left leg"
+    },
+    {
+      "caption_id": "c03",
+      "original": "the newborn 's left leg moves with low amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's left leg makes small, quick movements",
+      "paraphrase_B": "brief, brisk movements of limited range in the left leg"
+    },
+    {
+      "caption_id": "c04",
+      "original": "the newborn 's left leg moves with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's left leg moves slightly and slowly",
+      "paraphrase_B": "small, gradual movements of the left leg"
+    },
+    {
+      "caption_id": "c05",
+      "original": "the newborn 's right leg moves with low amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's right leg makes small, rapid movements",
+      "paraphrase_B": "quick movements of limited range in the right leg"
+    },
+    {
+      "caption_id": "c06",
+      "original": "the newborn 's right leg moves with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's right leg moves a little, slowly",
+      "paraphrase_B": "slight, unhurried movements of the right leg"
+    },
+    {
+      "caption_id": "c07",
+      "original": "the newborn extends its left arm with high amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby slowly stretches its left arm out through a wide range",
+      "paraphrase_B": "a large, slow extension of the left arm"
+    },
+    {
+      "caption_id": "c08",
+      "original": "the newborn extends its left leg with high amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn quickly stretches its left leg out fully",
+      "paraphrase_B": "a wide, rapid extension of the left leg"
+    },
+    {
+      "caption_id": "c09",
+      "original": "the newborn extends its right leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the baby slowly stretches its right leg a little",
+      "paraphrase_B": "a small, gradual extension of the right leg"
+    },
+    {
+      "caption_id": "c10",
+      "original": "the newborn lifts its right leg with high amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn raises its right leg high and quickly",
+      "paraphrase_B": "a large, brisk lift of the right leg"
+    },
+    {
+      "caption_id": "c11",
+      "original": "the newborn moves its head, right hand, and left hand, and moves its right leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its head and both hands, and makes small, slow movements with its right leg",
+      "paraphrase_B": "head and hand movements, with slight, unhurried motion of the right leg"
+    },
+    {
+      "caption_id": "c12",
+      "original": "the newborn moves its left arm with high amplitude and fast speed, moving its right hand and left hand",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn makes large, quick movements of its left arm while moving both hands",
+      "paraphrase_B": "wide, rapid left-arm movements, with both hands also moving"
+    },
+    {
+      "caption_id": "c13",
+      "original": "the newborn moves its left arm with low amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's left arm makes small, quick movements",
+      "paraphrase_B": "brisk movements of limited range in the left arm"
+    },
+    {
+      "caption_id": "c14",
+      "original": "the newborn moves its left arm with low amplitude and fast speed, moving its right hand",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes small, rapid movements of its left arm and moves its right hand",
+      "paraphrase_B": "quick, slight left-arm movements, with the right hand also moving"
+    },
+    {
+      "caption_id": "c15",
+      "original": "the newborn moves its left arm with low amplitude and slow speed, and its right hand and left hand",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its left arm slightly and slowly, and moves both hands",
+      "paraphrase_B": "small, unhurried left-arm movements together with movements of both hands"
+    },
+    {
+      "caption_id": "c16",
+      "original": "the newborn moves its left hand, and moves its left leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its left hand and makes small, slow movements of its left leg",
+      "paraphrase_B": "left-hand movement with slight, gradual motion of the left leg"
+    },
+    {
+      "caption_id": "c17",
+      "original": "the newborn moves its left leg with low amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the baby makes small, quick movements with its left leg",
+      "paraphrase_B": "the left leg moves rapidly but only a little"
+    },
+    {
+      "caption_id": "c18",
+      "original": "the newborn moves its left leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn's left leg makes slight, slow movements",
+      "paraphrase_B": "minimal, unhurried motion of the left leg"
+    },
+    {
+      "caption_id": "c19",
+      "original": "the newborn moves its right arm with low amplitude and fast speed, and moves its right hand",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements of its right arm and moves its right hand",
+      "paraphrase_B": "brisk right-arm movements of limited range, with the right hand also moving"
+    },
+    {
+      "caption_id": "c20",
+      "original": "the newborn moves its right arm with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its right arm slightly and slowly",
+      "paraphrase_B": "small, gradual movements of the right arm"
+    },
+    {
+      "caption_id": "c21",
+      "original": "the newborn moves its right hand, and moves its right leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its right hand and makes small, slow movements of its right leg",
+      "paraphrase_B": "right-hand movement with slight, unhurried motion of the right leg"
+    },
+    {
+      "caption_id": "c22",
+      "original": "the newborn moves its right leg with high amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's right leg makes large, rapid movements",
+      "paraphrase_B": "wide, brisk kicks of the right leg"
+    },
+    {
+      "caption_id": "c23",
+      "original": "the newborn moves its right leg with low amplitude and fast speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements with its right leg",
+      "paraphrase_B": "the right leg moves rapidly through a limited range"
+    },
+    {
+      "caption_id": "c24",
+      "original": "the newborn moves its right leg with low amplitude and slow speed",
+      "caption_type_manual": "1 limb",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn's right leg moves slightly and slowly",
+      "paraphrase_B": "minimal, gradual motion of the right leg"
+    },
+    {
+      "caption_id": "c25",
+      "original": "the newborn extends its left arm with low amplitude and fast speed while extending its right leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby quickly stretches its left arm and its right leg a little",
+      "paraphrase_B": "small, rapid extensions of the left arm and the right leg"
+    },
+    {
+      "caption_id": "c26",
+      "original": "the newborn extends its right arm with low amplitude and slow speed while extending its right leg with low amplitude and slow speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn slowly stretches its right arm and right leg a little",
+      "paraphrase_B": "slight, gradual extensions of the right arm and the right leg"
+    },
+    {
+      "caption_id": "c27",
+      "original": "the newborn moves its head and its right hand, and its right leg and left leg with high amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its head and right hand, and makes large, rapid movements with both legs",
+      "paraphrase_B": "head and right-hand movements, with wide, brisk kicking of the right and left legs"
+    },
+    {
+      "caption_id": "c28",
+      "original": "the newborn moves its head and right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its head and makes small, quick movements with both legs",
+      "paraphrase_B": "head movement with brisk, limited-range motion of the right and left legs"
+    },
+    {
+      "caption_id": "c29",
+      "original": "the newborn moves its head and right leg and left leg with low amplitude and slow speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its head and moves both legs slightly and slowly",
+      "paraphrase_B": "head movement with small, unhurried motion of the right and left legs"
+    },
+    {
+      "caption_id": "c30",
+      "original": "the newborn moves its left hand and right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its left hand and makes small, quick movements with both legs",
+      "paraphrase_B": "left-hand movement with rapid, slight motion of the right and left legs"
+    },
+    {
+      "caption_id": "c31",
+      "original": "the newborn moves its right arm and its left arm with high amplitude and fast speed, and moves its head, its right hand, and its left hand",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes large, rapid movements with both arms and also moves its head and both hands",
+      "paraphrase_B": "wide, brisk motion of the right and left arms, together with head and hand movements"
+    },
+    {
+      "caption_id": "c32",
+      "original": "the newborn moves its right arm and its left arm with low amplitude and slow speed, and moves its right hand and its left hand",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves both arms slightly and slowly, and moves both hands",
+      "paraphrase_B": "small, gradual movements of the right and left arms, with both hands moving"
+    },
+    {
+      "caption_id": "c33",
+      "original": "the newborn moves its right arm and left arm with high amplitude and fast speed, and moves its head, right hand, and left hand",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes wide, quick movements of its right and left arms, and moves its head and both hands",
+      "paraphrase_B": "large, brisk arm movements on both sides, with head and hand movements"
+    },
+    {
+      "caption_id": "c34",
+      "original": "the newborn moves its right arm with high amplitude and fast speed, and its right hand, and its left leg with low amplitude and slow speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes large, quick movements of its right arm, moves its right hand, and moves its left leg slightly and slowly",
+      "paraphrase_B": "wide, rapid right-arm motion with right-hand movement, and small, unhurried motion of the left leg"
+    },
+    {
+      "caption_id": "c35",
+      "original": "the newborn moves its right arm with high amplitude and fast speed, and moves its right hand, and moves its right leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes large, rapid movements of its right arm, moves its right hand, and makes small, quick movements of its right leg",
+      "paraphrase_B": "wide, brisk right-arm motion and right-hand movement, with slight, quick motion of the right leg"
+    },
+    {
+      "caption_id": "c36",
+      "original": "the newborn moves its right arm with low amplitude and fast speed, moves its right hand, and moves its right leg with high amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements of its right arm, moves its right hand, and makes large, rapid movements of its right leg",
+      "paraphrase_B": "brisk, limited right-arm motion with right-hand movement, and wide, rapid kicking of the right leg"
+    },
+    {
+      "caption_id": "c37",
+      "original": "the newborn moves its right hand and right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn moves its right hand and makes small, quick movements with both legs",
+      "paraphrase_B": "right-hand movement with brisk, slight motion of the right and left legs"
+    },
+    {
+      "caption_id": "c38",
+      "original": "the newborn moves its right hand and right leg and left leg with low amplitude and slow speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its right hand and moves both legs slightly and slowly",
+      "paraphrase_B": "right-hand movement with small, unhurried motion of the right and left legs"
+    },
+    {
+      "caption_id": "c39",
+      "original": "the newborn moves its right leg and its left leg with high amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes large, rapid movements with both legs",
+      "paraphrase_B": "wide, brisk kicking of the right and left legs"
+    },
+    {
+      "caption_id": "c40",
+      "original": "the newborn moves its right leg and its left leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 2,
+      "paraphrase_A": "the baby makes small, quick movements with both legs",
+      "paraphrase_B": "brisk motion of limited range in the right and left legs"
+    },
+    {
+      "caption_id": "c41",
+      "original": "the newborn moves its right leg and left leg with high amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby kicks both legs widely and quickly",
+      "paraphrase_B": "large, swift movements of the right and left legs"
+    },
+    {
+      "caption_id": "c42",
+      "original": "the newborn moves its right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 9,
+      "paraphrase_A": "the newborn's legs both make small, rapid movements",
+      "paraphrase_B": "quick, slight motion of the right and left legs"
+    },
+    {
+      "caption_id": "c43",
+      "original": "the newborn moves its right leg and left leg with low amplitude and slow speed",
+      "caption_type_manual": "2 limbs",
+      "n_test_clips": 4,
+      "paraphrase_A": "the baby moves both legs slightly and slowly",
+      "paraphrase_B": "small, gradual movements of the right and left legs"
+    },
+    {
+      "caption_id": "c44",
+      "original": "the newborn moves its head, right arm, left arm, right hand, and left hand, and its right leg and left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its head, both arms and both hands, and makes large, rapid movements with both legs",
+      "paraphrase_B": "head, arm and hand movements on both sides, with wide, brisk kicking of the right and left legs"
+    },
+    {
+      "caption_id": "c45",
+      "original": "the newborn moves its head, right arm, left arm, right hand, left hand, right leg, and left leg with high amplitude and fast speed on the upper parts and low amplitude and fast speed on the lower parts",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves its head, both arms, both hands and both legs quickly, with large movements of the upper body and small movements of the legs",
+      "paraphrase_B": "rapid movements throughout: wide in the head, arms and hands, slight in the right and left legs"
+    },
+    {
+      "caption_id": "c46",
+      "original": "the newborn moves its left arm with high amplitude and fast speed, and its right hand, left hand, right leg, and left leg with low amplitude and slow speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes large, quick movements of its left arm, while its hands and both legs move slightly and slowly",
+      "paraphrase_B": "wide, brisk left-arm motion, with small, unhurried movements of both hands and of the right and left legs"
+    },
+    {
+      "caption_id": "c47",
+      "original": "the newborn moves its left arm with high amplitude and fast speed, its head, left hand, right leg, and left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes large, rapid movements of its left arm, and moves its head, left hand and both legs with small, quick movements",
+      "paraphrase_B": "wide, brisk left-arm motion, with slight, quick movements of the head, left hand, and right and left legs"
+    },
+    {
+      "caption_id": "c48",
+      "original": "the newborn moves its left arm with low amplitude and fast speed, and its left hand, while moving its right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes small, quick movements of its left arm and moves its left hand, while both legs also move slightly and quickly",
+      "paraphrase_B": "brisk, limited motion of the left arm and left hand, with rapid, slight movements of the right and left legs"
+    },
+    {
+      "caption_id": "c49",
+      "original": "the newborn moves its left arm with low amplitude and fast speed, and its right hand, and its right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements of its left arm, moves its right hand, and makes small, quick movements with both legs",
+      "paraphrase_B": "brisk, slight left-arm motion with right-hand movement, and rapid, limited motion of the right and left legs"
+    },
+    {
+      "caption_id": "c50",
+      "original": "the newborn moves its left arm with low amplitude and fast speed, its right hand, right leg, and left leg with low amplitude and slow speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes small, quick movements of its left arm, while its right hand and both legs move slightly and slowly",
+      "paraphrase_B": "brisk, limited left-arm motion, with small, unhurried movements of the right hand and of the right and left legs"
+    },
+    {
+      "caption_id": "c51",
+      "original": "the newborn moves its right arm and its left arm with high amplitude and fast speed, and moves its head, its right hand, and its left hand, and moves its right leg and its left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 3,
+      "paraphrase_A": "the baby makes large, rapid movements with both arms and both legs, and also moves its head and hands",
+      "paraphrase_B": "wide, brisk motion of the right and left arms and legs, together with head and hand movements"
+    },
+    {
+      "caption_id": "c52",
+      "original": "the newborn moves its right arm and its left arm with high amplitude and fast speed, and moves its head, its right hand, and its left hand, and moves its right leg and its left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 2,
+      "paraphrase_A": "the newborn makes large, rapid arm movements on both sides and moves its head and hands, while both legs make small, quick movements",
+      "paraphrase_B": "wide, brisk motion of the right and left arms with head and hand movements, and rapid but slight motion of the right and left legs"
+    },
+    {
+      "caption_id": "c53",
+      "original": "the newborn moves its right arm and its left arm with high amplitude and fast speed, and moves its head, its right hand, and its left hand, and moves its right leg and its left leg with low amplitude and slow speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes large, quick movements with both arms and moves its head and hands, while both legs move slightly and slowly",
+      "paraphrase_B": "wide, brisk arm motion on both sides with head and hand movements, and small, unhurried motion of the right and left legs"
+    },
+    {
+      "caption_id": "c54",
+      "original": "the newborn moves its right arm and its left arm with low amplitude and fast speed, and moves its head, its right hand, and its left hand, and moves its right leg and its left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes small, quick movements with both arms and moves its head and hands, while both legs make large, rapid movements",
+      "paraphrase_B": "brisk, limited arm motion on both sides with head and hand movements, and wide, rapid kicking of the right and left legs"
+    },
+    {
+      "caption_id": "c55",
+      "original": "the newborn moves its right arm and left arm with high amplitude and fast speed, and its head, right hand, and left hand, as well as its right leg and left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves both arms and both legs widely and quickly, and also moves its head and both hands",
+      "paraphrase_B": "large, swift movements of the right and left arms and legs, with head and hand movements"
+    },
+    {
+      "caption_id": "c56",
+      "original": "the newborn moves its right arm and left arm with high amplitude and fast speed, and its head, right hand, and left hand; it also moves its right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves both arms widely and quickly, along with its head and both hands, and moves both legs slightly but quickly",
+      "paraphrase_B": "wide, rapid arm motion on both sides with head and hand movements, plus small, brisk motion of the right and left legs"
+    },
+    {
+      "caption_id": "c57",
+      "original": "the newborn moves its right arm and left arm with low amplitude and fast speed, and its right hand and left hand, and its right leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes small, quick movements with both arms and both hands, and with its right leg",
+      "paraphrase_B": "brisk, slight motion of the right and left arms and hands, and of the right leg"
+    },
+    {
+      "caption_id": "c58",
+      "original": "the newborn moves its right arm and left arm with low amplitude and fast speed, and its right leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements with both arms and large, rapid movements with its right leg",
+      "paraphrase_B": "brisk, limited motion of the right and left arms, with wide, rapid kicking of the right leg"
+    },
+    {
+      "caption_id": "c59",
+      "original": "the newborn moves its right arm with high amplitude and fast speed, and moves its right leg and its left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn makes large, rapid movements with its right arm and with both legs",
+      "paraphrase_B": "wide, brisk motion of the right arm and of the right and left legs"
+    },
+    {
+      "caption_id": "c60",
+      "original": "the newborn moves its right arm with low amplitude and fast speed, and its right hand, and its right leg and left leg with low amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby makes small, quick movements of its right arm, moves its right hand, and makes small, quick movements with both legs",
+      "paraphrase_B": "brisk, slight right-arm motion with right-hand movement, and rapid, limited motion of the right and left legs"
+    },
+    {
+      "caption_id": "c61",
+      "original": "the newborn moves its right arm, left arm, and right leg with high amplitude and slow speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves its right arm, left arm and right leg slowly through a wide range",
+      "paraphrase_B": "large, unhurried movements of both arms and the right leg"
+    },
+    {
+      "caption_id": "c62",
+      "original": "the newborn moves its right arm, left arm, head, right hand, left hand, right leg, and left leg with high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 3,
+      "paraphrase_A": "the baby moves its head, both arms, both hands and both legs widely and quickly",
+      "paraphrase_B": "large, rapid movements of the head, the right and left arms and hands, and the right and left legs"
+    },
+    {
+      "caption_id": "c63",
+      "original": "the newborn moves its right arm, left arm, right hand, left hand, right leg, and left leg with low amplitude and slow speed, and high amplitude and fast speed",
+      "caption_type_manual": "3-4 limbs",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn moves both arms, both hands and both legs, partly with small, slow movements and partly with large, fast ones",
+      "paraphrase_B": "movements of the right and left arms, hands and legs, alternating between slight, slow motion and wide, rapid motion"
+    },
+    {
+      "caption_id": "c64",
+      "original": "the newborn 's right hand moves",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's right hand moves",
+      "paraphrase_B": "movement of the right hand only"
+    },
+    {
+      "caption_id": "c65",
+      "original": "the newborn extends its right hand",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 4,
+      "paraphrase_A": "the newborn stretches out its right hand",
+      "paraphrase_B": "an extension of the right hand"
+    },
+    {
+      "caption_id": "c66",
+      "original": "the newborn is lying still in a bed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 14,
+      "paraphrase_A": "the newborn rests quietly in a bed without moving",
+      "paraphrase_B": "no movement; the baby lies calmly in its bed"
+    },
+    {
+      "caption_id": "c67",
+      "original": "the newborn is lying still on a bed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby rests motionless on a bed",
+      "paraphrase_B": "the newborn stays still, lying on a bed"
+    },
+    {
+      "caption_id": "c68",
+      "original": "the newborn lies still",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 34,
+      "paraphrase_A": "the newborn rests without moving",
+      "paraphrase_B": "the baby is quiet and motionless"
+    },
+    {
+      "caption_id": "c69",
+      "original": "the newborn lies still in a bed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 46,
+      "paraphrase_A": "the baby rests motionless in a bed",
+      "paraphrase_B": "the newborn stays quiet in its bed, without moving"
+    },
+    {
+      "caption_id": "c70",
+      "original": "the newborn lies still on a bed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 4,
+      "paraphrase_A": "the newborn rests quietly on a bed without moving",
+      "paraphrase_B": "no visible movement; the baby lies on a bed"
+    },
+    {
+      "caption_id": "c71",
+      "original": "the newborn lowers its right leg with low amplitude and slow speed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby slowly brings its right leg down a little",
+      "paraphrase_B": "a small, gradual lowering of the right leg"
+    },
+    {
+      "caption_id": "c72",
+      "original": "the newborn moves both hands",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's hands both move",
+      "paraphrase_B": "movement of the right and left hands"
+    },
+    {
+      "caption_id": "c73",
+      "original": "the newborn moves its left hand slowly",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby's left hand moves slowly",
+      "paraphrase_B": "slow, unhurried movement of the left hand"
+    },
+    {
+      "caption_id": "c74",
+      "original": "the newborn moves its right hand",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's right hand moves",
+      "paraphrase_B": "movement of the right hand"
+    },
+    {
+      "caption_id": "c75",
+      "original": "the newborn moves its right hand and left hand",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby moves both of its hands",
+      "paraphrase_B": "the right and left hands move"
+    },
+    {
+      "caption_id": "c76",
+      "original": "the newborn moves its right hand slowly",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 4,
+      "paraphrase_A": "the baby's right hand moves slowly",
+      "paraphrase_B": "gradual movement of the right hand"
+    },
+    {
+      "caption_id": "c77",
+      "original": "the newborn remains motionless",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 8,
+      "paraphrase_A": "the newborn stays completely still",
+      "paraphrase_B": "the baby shows no movement"
+    },
+    {
+      "caption_id": "c78",
+      "original": "the newborn remains still",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 3,
+      "paraphrase_A": "the baby stays still",
+      "paraphrase_B": "the newborn keeps quiet and does not move"
+    },
+    {
+      "caption_id": "c79",
+      "original": "the newborn slowly moves its left hand",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the newborn's left hand moves gradually",
+      "paraphrase_B": "unhurried movement of the left hand"
+    },
+    {
+      "caption_id": "c80",
+      "original": "the newborn swings its left leg with high amplitude and fast speed",
+      "caption_type_manual": "still/none",
+      "n_test_clips": 1,
+      "paraphrase_A": "the baby swings its left leg widely and quickly",
+      "paraphrase_B": "a large, rapid swing of the left leg"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Guidance sweep (PLAN.md E7 / Fig. 8d): selected V7 manual + automatic checkpoints on validation at
+# CFG 1.0. CFG 2.0 is the val_sweep itself (analysis/artifacts/val). Validate + kinematics only.
+name: val_guidance_cfg1.0
+split: val
+output_dir: analysis/artifacts/val_guidance/cfg1.0
+selection_file: analysis/selection/selection.json
+models:
+  - {runs: "v7_*", steps: selected}
+baselines: []
+stages:
+  validate: {cfg_scale: 1.0, seeds: [31415, 92653], inference_steps: 50}
+  kinematics: {}

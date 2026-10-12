@@ -1,0 +1,106 @@
+{
+  "primary": {
+    "contrast": "manual - automatic, all 16 cells",
+    "estimate": 0.296875,
+    "ci95": [
+      0.228515625,
+      0.36067708333333337
+    ],
+    "p_sign_flip_one_sided": 0.0625,
+    "per_patient": {
+      "pz15": 0.3203,
+      "pz16": 0.2943,
+      "pz18": 0.3464,
+      "pz25": 0.2266
+    },
+    "n_patients": 4
+  },
+  "secondary": [
+    {
+      "contrast": "manual - automatic, amplitude_order",
+      "estimate": 0.08854166666666669,
+      "ci95": [
+        -0.010416666666666657,
+        0.18489583333333331
+      ],
+      "p_sign_flip_one_sided": 0.125,
+      "per_patient": {
+        "pz15": 0.0938,
+        "pz16": 0.0,
+        "pz18": 0.1979,
+        "pz25": 0.0625
+      },
+      "n_patients": 4,
+      "p_holm": 0.375
+    },
+    {
+      "contrast": "manual - automatic, speed_order",
+      "estimate": 0.4609375,
+      "ci95": [
+        0.2526041666666667,
+        0.6588541666666667
+      ],
+      "p_sign_flip_one_sided": 0.0625,
+      "per_patient": {
+        "pz15": 0.5104,
+        "pz16": 0.5521,
+        "pz18": 0.4896,
+        "pz25": 0.2917
+      },
+      "n_patients": 4,
+      "p_holm": 0.3125
+    },
+    {
+      "contrast": "manual - automatic, moves_more_than_still",
+      "estimate": 0.013020833333333343,
+      "ci95": [
+        0.0,
+        0.0390625
+      ],
+      "p_sign_flip_one_sided": 0.125,
+      "per_patient": {
+        "pz15": 0.0104,
+        "pz16": 0.0208,
+        "pz18": 0.0,
+        "pz25": 0.0208
+      },
+      "n_patients": 4,
+      "p_holm": 0.375
+    },
+    {
+      "contrast": "manual - automatic, specificity",
+      "estimate": 0.625,
+      "ci95": [
+        0.5442708333333334,
+        0.6953125
+      ],
+      "p_sign_flip_one_sided": 0.0625,
+      "per_patient": {
+        "pz15": 0.6667,
+        "pz16": 0.6042,
+        "pz18": 0.6979,
+        "pz25": 0.5312
+      },
+      "n_patients": 4,
+      "p_holm": 0.3125
+    },
+    {
+      "contrast": "body_scale_error, automatic - manual (positive favours manual)",
+      "estimate": 0.002473445876999705,
+      "p_sign_flip_one_sided": 0.5,
+      "per_patient": {
+        "pz15": 0.0124,
+        "pz16": 0.0101,
+        "pz18": -0.0402,
+        "pz25": 0.0275
+      },
+      "p_holm": 0.5
+    }
+  ],
+  "absolute": {
+    "v7_manual": 0.9440104166666666,
+    "v7_automatic": 0.6471354166666667
+  },
+  "gate_passed": true,
+  "note": "With n patients the smallest attainable exact one-sided p is 1/2^n; the CI and the per-patient differences carry the evidence."
+}

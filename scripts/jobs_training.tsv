@@ -1,0 +1,19 @@
+# run_name	config	prompt_source	seed	part
+v7_manual_s42	configs/v7.yaml	manual	42	A
+v7_automatic_s42	configs/v7.yaml	automatic	42	A
+v7_manual_s43	configs/v7.yaml	manual	43	A
+v7_automatic_s43	configs/v7.yaml	automatic	43	A
+v7_manual_s44	configs/v7.yaml	manual	44	A
+v7_automatic_s44	configs/v7.yaml	automatic	44	A
+abl_minus_all_s42	configs/ablations/v7_minus_all.yaml	manual	42	B
+abl_minus_magnitude_s42	configs/ablations/v7_minus_magnitude.yaml	manual	42	B
+abl_minus_label_s42	configs/ablations/v7_minus_label.yaml	manual	42	B
+abl_minus_balance_s42	configs/ablations/v7_minus_balance.yaml	manual	42	B
+abl_minus_all_s43	configs/ablations/v7_minus_all.yaml	manual	43	B
+abl_minus_magnitude_s43	configs/ablations/v7_minus_magnitude.yaml	manual	43	B
+abl_minus_label_s43	configs/ablations/v7_minus_label.yaml	manual	43	B
+abl_minus_balance_s43	configs/ablations/v7_minus_balance.yaml	manual	43	B
+abl_minus_all_s44	configs/ablations/v7_minus_all.yaml	manual	44	B
+abl_minus_magnitude_s44	configs/ablations/v7_minus_magnitude.yaml	manual	44	B
+abl_minus_label_s44	configs/ablations/v7_minus_label.yaml	manual	44	B
+abl_minus_balance_s44	configs/ablations/v7_minus_balance.yaml	manual	44	B

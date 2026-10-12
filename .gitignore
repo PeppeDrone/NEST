@@ -1,0 +1,39 @@
+# Clinical data and anything derived from it at clip level: never commit
+data/
+Data/
+runs/
+analysis/artifacts/
+analysis/selection/*.tmp
+stage2/run/
+logs/
+
+# Third-party code and weights (see stage2/third_party/model_provenance.json)
+external/
+
+# Python / build caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# LaTeX build products (main.pdf is built by manuscript/compile.sh)
+manuscript/*.aux
+manuscript/*.bbl
+manuscript/*.blg
+manuscript/*.log
+manuscript/*.out
+manuscript/*.abs
+manuscript/build.log
+manuscript/main.pdf
+
+# Archives and local files
+*.zip
+*.tar*
+.DS_Store
+
+# Local-only selection sheet for Fig. 10 (contains clip identifiers)
+manuscript/figures/fig10_candidates.pdf
+manuscript/figures/*.png
+manuscript/generated/fig10_candidates.txt
+manuscript/
+manuscript/

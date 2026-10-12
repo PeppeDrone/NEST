@@ -1,0 +1,22 @@
+{
+  "n_paraphrases": 160,
+  "n_match": 57,
+  "match_rate": 0.35625,
+  "match_rate_clip_weighted": 0.43661971830985913,
+  "match_rate_by_caption_type": {
+    "1 limb": 0.208,
+    "2 limbs": 0.184,
+    "3-4 limbs": 0.275,
+    "still/none": 0.853
+  },
+  "match_rate_by_version": {
+    "A": 0.4,
+    "B": 0.312
+  },
+  "changed_fields": {
+    "amplitude": 163,
+    "speed": 88,
+    "known": 51,
+    "moving": 31
+  }
+}

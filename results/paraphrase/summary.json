@@ -1,0 +1,308 @@
+[
+  {
+    "version": "A",
+    "subset": "all",
+    "n_clips": 213,
+    "n_patients": 5,
+    "change_ratio": 0.5790630530526177,
+    "change_ratio_ci": [
+      0.5013462384439348,
+      0.6645851059476057
+    ],
+    "wording_change": 0.03597297705409346,
+    "seed_spread": 0.062122728888428506,
+    "error_original": 0.1197236245325797,
+    "error_paraphrase": 0.11378033593334087,
+    "delta_error": -0.005943288599238835,
+    "delta_error_ci": [
+      -0.015467515042136337,
+      0.0024762127574025775
+    ],
+    "amp_ratio_original": 0.8728398017508777,
+    "amp_ratio_paraphrase": 0.6902679544486369,
+    "delta_log_amp": -0.23467217386422615,
+    "delta_log_amp_ci": [
+      -0.3304571694612987,
+      -0.13069677617077075
+    ],
+    "sel_ratio_original": 4.434149832826544,
+    "sel_ratio_paraphrase": 4.0499755132078885,
+    "n_single_limb": 30,
+    "slope_original": 0.8930611448494794,
+    "rho_original": 0.682957026234288,
+    "slope_paraphrase": 0.6971454706876329,
+    "rho_paraphrase": 0.6910336999957779
+  },
+  {
+    "version": "A",
+    "subset": "match",
+    "n_clips": 99,
+    "n_patients": 4,
+    "change_ratio": 0.45494311838337675,
+    "change_ratio_ci": [
+      0.3012686953998817,
+      0.6845556630080328
+    ],
+    "wording_change": 0.023547208635767626,
+    "seed_spread": 0.051758577466655055,
+    "error_original": 0.14069234499975364,
+    "error_paraphrase": 0.1448336569071551,
+    "delta_error": 0.004141311907401439,
+    "delta_error_ci": [
+      -0.00922699466506659,
+      0.02886900660391434
+    ],
+    "amp_ratio_original": 0.755485514790596,
+    "amp_ratio_paraphrase": 0.7762683229654541,
+    "delta_log_amp": 0.027137628914932908,
+    "delta_log_amp_ci": [
+      -0.03531391406499598,
+      0.09121517994150102
+    ],
+    "sel_ratio_original": 1.5912959575247192,
+    "sel_ratio_paraphrase": 1.9333056893676521,
+    "n_single_limb": 9,
+    "slope_original": 0.8329683691916759,
+    "rho_original": 0.5995794681508967,
+    "slope_paraphrase": 0.816400607488215,
+    "rho_paraphrase": 0.6433642547928261
+  },
+  {
+    "version": "A",
+    "subset": "changed",
+    "n_clips": 114,
+    "n_patients": 5,
+    "change_ratio": 0.6575040438032544,
+    "change_ratio_ci": [
+      0.5869658821958489,
+      0.775923000144443
+    ],
+    "wording_change": 0.04676377594369221,
+    "seed_spread": 0.07112317617575806,
+    "error_original": 0.12278348951408238,
+    "error_paraphrase": 0.11059659464595724,
+    "delta_error": -0.012186894868125152,
+    "delta_error_ci": [
+      -0.026012275097263015,
+      -0.003032584568841339
+    ],
+    "amp_ratio_original": 0.9485696251562459,
+    "amp_ratio_paraphrase": 0.6347711090476724,
+    "delta_log_amp": -0.40169071650327454,
+    "delta_log_amp_ci": [
+      -0.5216953655294454,
+      -0.27118171616699654
+    ],
+    "sel_ratio_original": 4.671876554281045,
+    "sel_ratio_paraphrase": 4.252585630099341,
+    "n_single_limb": 21,
+    "slope_original": 0.9091265818383505,
+    "rho_original": 0.7230756768797716,
+    "slope_paraphrase": 0.5885454502004313,
+    "rho_paraphrase": 0.7781089892873778
+  },
+  {
+    "version": "B",
+    "subset": "all",
+    "n_clips": 213,
+    "n_patients": 5,
+    "change_ratio": 0.8369627712802787,
+    "change_ratio_ci": [
+      0.6826921621506671,
+      0.9913242818491262
+    ],
+    "wording_change": 0.051994411329952556,
+    "seed_spread": 0.062122728888428506,
+    "error_original": 0.1197236245325797,
+    "error_paraphrase": 0.11634580548915816,
+    "delta_error": -0.003377819043421533,
+    "delta_error_ci": [
+      -0.025045953274862507,
+      0.017921329073549576
+    ],
+    "amp_ratio_original": 0.8728398017508777,
+    "amp_ratio_paraphrase": 0.7565354273111011,
+    "delta_log_amp": -0.14300267316985846,
+    "delta_log_amp_ci": [
+      -0.3329981024935767,
+      0.0412066779176193
+    ],
+    "sel_ratio_original": 4.434149832826544,
+    "sel_ratio_paraphrase": 2.63774289055701,
+    "n_single_limb": 30,
+    "slope_original": 0.8930611448494794,
+    "rho_original": 0.682957026234288,
+    "slope_paraphrase": 0.6807025985271662,
+    "rho_paraphrase": 0.6563328126047769
+  },
+  {
+    "version": "B",
+    "subset": "match",
+    "n_clips": 87,
+    "n_patients": 5,
+    "change_ratio": 0.7059750801421639,
+    "change_ratio_ci": [
+      0.4988174531636357,
+      0.8891359155012137
+    ],
+    "wording_change": 0.01945104511526804,
+    "seed_spread": 0.027552027914853786,
+    "error_original": 0.10292329688898094,
+    "error_paraphrase": 0.12060310786429192,
+    "delta_error": 0.01767981097531099,
+    "delta_error_ci": [
+      -0.0022623489485744407,
+      0.06326843723103209
+    ],
+    "amp_ratio_original": 0.5785326785073642,
+    "amp_ratio_paraphrase": 0.7190273308589195,
+    "delta_log_amp": 0.2174043359368168,
+    "delta_log_amp_ci": [
+      -0.029154851542579317,
+      0.4086816139922206
+    ],
+    "sel_ratio_original": 7.423118404745447,
+    "sel_ratio_paraphrase": 7.558325376890101,
+    "n_single_limb": 4,
+    "slope_original": 0.653141776797537,
+    "rho_original": 0.5405154188233579,
+    "slope_paraphrase": 0.6287379057866572,
+    "rho_paraphrase": 0.5718451556462782
+  },
+  {
+    "version": "B",
+    "subset": "changed",
+    "n_clips": 126,
+    "n_patients": 4,
+    "change_ratio": 0.8659408635810855,
+    "change_ratio_ci": [
+      0.700456395875759,
+      1.0362589490276757
+    ],
+    "wording_change": 0.07446483085913949,
+    "seed_spread": 0.08599297479875392,
+    "error_original": 0.16937366996579648,
+    "error_paraphrase": 0.14964979140134016,
+    "delta_error": -0.019723878564456333,
+    "delta_error_ci": [
+      -0.0527121834231126,
+      0.007117143031791754
+    ],
+    "amp_ratio_original": 0.9898697183838883,
+    "amp_ratio_paraphrase": 0.771450354793946,
+    "delta_log_amp": -0.24930101608264849,
+    "delta_log_amp_ci": [
+      -0.4614432342853019,
+      -0.04251363460060554
+    ],
+    "sel_ratio_original": 3.6222300995076515,
+    "sel_ratio_paraphrase": 2.4134094383670504,
+    "n_single_limb": 26,
+    "slope_original": 0.9001963776491774,
+    "rho_original": 0.7137877765279341,
+    "slope_paraphrase": 0.6016925174080616,
+    "rho_paraphrase": 0.652655418072741
+  },
+  {
+    "version": "pooled",
+    "subset": "all",
+    "n_clips": 426,
+    "n_patients": 5,
+    "change_ratio": 0.7080129121664483,
+    "change_ratio_ci": [
+      0.6226801575192957,
+      0.8058576557654767
+    ],
+    "wording_change": 0.043983694192023005,
+    "seed_spread": 0.06212272888842849,
+    "error_original": 0.1197236245325797,
+    "error_paraphrase": 0.11506307071124951,
+    "delta_error": -0.004660553821330184,
+    "delta_error_ci": [
+      -0.016263278158075968,
+      0.0058311056054727375
+    ],
+    "amp_ratio_original": 0.8728398017508777,
+    "amp_ratio_paraphrase": 0.7234016908798688,
+    "delta_log_amp": -0.18778737893001238,
+    "delta_log_amp_ci": [
+      -0.2921368477790815,
+      -0.07180530656414076
+    ],
+    "sel_ratio_original": 4.434149832826544,
+    "sel_ratio_paraphrase": 3.3438592018824496,
+    "n_single_limb": 60,
+    "slope_original": 0.89306114484948,
+    "rho_original": 0.6829570262342882,
+    "slope_paraphrase": 0.6889240346074,
+    "rho_paraphrase": 0.6734917297160514
+  },
+  {
+    "version": "pooled",
+    "subset": "match",
+    "n_clips": 186,
+    "n_patients": 5,
+    "change_ratio": 0.5349484631862743,
+    "change_ratio_ci": [
+      0.36092520873989276,
+      0.7266562596340113
+    ],
+    "wording_change": 0.021631261182630722,
+    "seed_spread": 0.04043615912790931,
+    "error_original": 0.10804515728741078,
+    "error_paraphrase": 0.11776920391077028,
+    "delta_error": 0.009724046623359513,
+    "delta_error_ci": [
+      -0.001899116260928371,
+      0.037127706474463965
+    ],
+    "amp_ratio_original": 0.6810901404703085,
+    "amp_ratio_paraphrase": 0.7522027859349307,
+    "delta_log_amp": 0.09931128749404283,
+    "delta_log_amp_ci": [
+      0.011240002861894484,
+      0.21763769313208378
+    ],
+    "sel_ratio_original": 4.434149832826544,
+    "sel_ratio_paraphrase": 4.7458155331288765,
+    "n_single_limb": 13,
+    "slope_original": 0.7651318383397547,
+    "rho_original": 0.5960713043526911,
+    "slope_paraphrase": 0.7397537757889688,
+    "rho_paraphrase": 0.6121344870261467
+  },
+  {
+    "version": "pooled",
+    "subset": "changed",
+    "n_clips": 240,
+    "n_patients": 5,
+    "change_ratio": 0.7767258233019738,
+    "change_ratio_ci": [
+      0.6762202362790017,
+      0.9211006883912548
+    ],
+    "wording_change": 0.06130682977430202,
+    "seed_spread": 0.07892982045283085,
+    "error_original": 0.12873809292127456,
+    "error_paraphrase": 0.11536678880991588,
+    "delta_error": -0.013371304111358695,
+    "delta_error_ci": [
+      -0.03202635936435569,
+      -0.0022190250974721487
+    ],
+    "amp_ratio_original": 0.9709003637450322,
+    "amp_ratio_paraphrase": 0.7086728431297081,
+    "delta_log_amp": -0.31482986521642875,
+    "delta_log_amp_ci": [
+      -0.43369094462477975,
+      -0.188705543209699
+    ],
+    "sel_ratio_original": 4.434149832826544,
+    "sel_ratio_paraphrase": 3.332997534233196,
+    "n_single_limb": 47,
+    "slope_original": 0.9069313103753202,
+    "rho_original": 0.7261840223446713,
+    "slope_paraphrase": 0.5947919954744834,
+    "rho_paraphrase": 0.7127452736210702
+  }
+]

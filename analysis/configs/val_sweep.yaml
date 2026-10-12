@@ -1,0 +1,15 @@
+# Validation sweep: every post-prior EMA snapshot of every run (Part A seeds + Part B ablations),
+# plus static and retrieval baselines. Feeds the selection rule (analysis/select.py), the
+# training-dynamics figures and every validation-level number. Re-run any time: cached.
+name: val_sweep
+split: val
+output_dir: analysis/artifacts/val
+selection_file: analysis/selection/selection.json
+models:
+  - {runs: "v7_*", steps: post_prior}
+  - {runs: "abl_*", steps: post_prior}
+baselines: [static, retrieval_manual, retrieval_automatic]
+stages:
+  validate: {cfg_scale: 2.0, seeds: [31415, 92653], inference_steps: 50}
+  commands: {cfg_scale: 2.0, seeds: [31415, 92653], max_clips: 16, inference_steps: 50, save_trajectories: false}
+  kinematics: {}

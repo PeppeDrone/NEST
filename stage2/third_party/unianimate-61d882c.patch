@@ -1,0 +1,1088 @@
+diff --git a/diffsynth/models/lora.py b/diffsynth/models/lora.py
+index 9b2dca1..e86f06a 100644
+--- a/diffsynth/models/lora.py
++++ b/diffsynth/models/lora.py
+@@ -248,20 +248,56 @@ class GeneralLoRAFromPeft:
+         device, dtype, computation_device, computation_dtype = self.fetch_device_and_dtype(state_dict_model)
+         lora_name_dict = self.get_name_dict(state_dict_lora)
+         for name in lora_name_dict:
++            up_key, down_key = lora_name_dict[name]
++            if up_key not in state_dict_lora or down_key not in state_dict_lora:
++                raise KeyError(
++                    "Missing LoRA tensor pair while loading PEFT LoRA. "
++                    f"target={name!r}, up_key={up_key!r}, down_key={down_key!r}, "
++                    f"up_exists={up_key in state_dict_lora}, down_exists={down_key in state_dict_lora}"
++                )
++
++            active_computation_device = computation_device
+             try:
+-                weight_up = state_dict_lora[lora_name_dict[name][0]].to(device=computation_device, dtype=computation_dtype)
+-                weight_down = state_dict_lora[lora_name_dict[name][1]].to(device=computation_device, dtype=computation_dtype)
+-            except:
+-                from ipdb import set_trace; set_trace()
++                weight_up = state_dict_lora[up_key].to(device=active_computation_device, dtype=computation_dtype)
++                weight_down = state_dict_lora[down_key].to(device=active_computation_device, dtype=computation_dtype)
++            except Exception as exc:
++                if computation_device.type == "cuda" and device.type == "cpu":
++                    if torch.cuda.is_available():
++                        torch.cuda.empty_cache()
++                    active_computation_device = torch.device("cpu")
++                    print(
++                        "    CUDA LoRA merge failed; retrying this tensor pair on CPU. "
++                        f"target={name}, up_key={up_key}, down_key={down_key}, error={exc}"
++                    )
++                    try:
++                        weight_up = state_dict_lora[up_key].to(device=active_computation_device, dtype=computation_dtype)
++                        weight_down = state_dict_lora[down_key].to(device=active_computation_device, dtype=computation_dtype)
++                    except Exception as fallback_exc:
++                        raise RuntimeError(
++                            "Failed to load LoRA tensor pair on CUDA and CPU fallback also failed. "
++                            f"target={name!r}, up_key={up_key!r}, down_key={down_key!r}, "
++                            f"model_device={device}, computation_device={computation_device}, "
++                            f"dtype={dtype}, computation_dtype={computation_dtype}"
++                        ) from fallback_exc
++                else:
++                    raise RuntimeError(
++                        "Failed to load LoRA tensor pair. "
++                        f"target={name!r}, up_key={up_key!r}, down_key={down_key!r}, "
++                        f"model_device={device}, computation_device={computation_device}, "
++                        f"dtype={dtype}, computation_dtype={computation_dtype}"
++                    ) from exc
+             if len(weight_up.shape) == 4:
+                 weight_up = weight_up.squeeze(3).squeeze(2)
+                 weight_down = weight_down.squeeze(3).squeeze(2)
+                 weight_lora = alpha * torch.mm(weight_up, weight_down).unsqueeze(2).unsqueeze(3)
+             else:
+                 weight_lora = alpha * torch.mm(weight_up, weight_down)
+-            weight_model = state_dict_model[name].to(device=computation_device, dtype=computation_dtype)
++            weight_model = state_dict_model[name].to(device=active_computation_device, dtype=computation_dtype)
+             weight_patched = weight_model + weight_lora
+             state_dict_model[name] = weight_patched.to(device=device, dtype=dtype)
++            del weight_up, weight_down, weight_lora, weight_model, weight_patched
++            if active_computation_device.type == "cuda":
++                torch.cuda.empty_cache()
+         # from ipdb import set_trace; set_trace()
+         print(f"    {len(lora_name_dict)} tensors are updated.")
+         model.load_state_dict(state_dict_model)
+diff --git a/diffsynth/models/model_manager.py b/diffsynth/models/model_manager.py
+index cca1953..ed30557 100644
+--- a/diffsynth/models/model_manager.py
++++ b/diffsynth/models/model_manager.py
+@@ -517,8 +517,7 @@ class ModelManager:
+                 print(f"    The following models are loaded: {model_names}.")
+                 break
+         else:
+-            from ipdb import set_trace; set_trace()
+-            print(f"    We cannot detect the model type. No models are loaded.")
++            raise RuntimeError(f"We cannot detect the model type for {file_path}. No models are loaded.")
+         
+ 
+     def load_models(self, file_path_list, model_names=None, device=None, torch_dtype=None):
+@@ -551,4 +550,3 @@ class ModelManager:
+     def to(self, device):
+         for model in self.model:
+             model.to(device)
+-
+diff --git a/dwpose/onnxdet.py b/dwpose/onnxdet.py
+index 15ae797..78459e1 100644
+--- a/dwpose/onnxdet.py
++++ b/dwpose/onnxdet.py
+@@ -95,7 +95,7 @@ def preprocess(img, input_size, swap=(2, 0, 1)):
+     padded_img = np.ascontiguousarray(padded_img, dtype=np.float32)
+     return padded_img, r
+ 
+-def inference_detector(session, oriImg):
++def inference_detector(session, oriImg, det_thresh=0.3):
+     input_shape = (640,640)
+     img, ratio = preprocess(oriImg, input_shape)
+ 
+@@ -114,10 +114,10 @@ def inference_detector(session, oriImg):
+     boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2]/2.
+     boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3]/2.
+     boxes_xyxy /= ratio
+-    dets = multiclass_nms(boxes_xyxy, scores, nms_thr=0.45, score_thr=0.1)
++    dets = multiclass_nms(boxes_xyxy, scores, nms_thr=0.45, score_thr=det_thresh)
+     if dets is not None:
+         final_boxes, final_scores, final_cls_inds = dets[:, :4], dets[:, 4], dets[:, 5]
+-        isscore = final_scores>0.3
++        isscore = final_scores > det_thresh
+         iscat = final_cls_inds == 0
+         isbbox = [ i and j for (i, j) in zip(isscore, iscat)]
+         final_boxes = final_boxes[isbbox]
+diff --git a/dwpose/util.py b/dwpose/util.py
+index 2f83229..b6af446 100644
+--- a/dwpose/util.py
++++ b/dwpose/util.py
+@@ -7,6 +7,10 @@ import cv2
+ eps = 0.01
+ 
+ 
++def _all_finite(*values):
++    return all(np.isfinite(value) for value in values)
++
++
+ def smart_resize(x, s):
+     Ht, Wt = s
+     if x.ndim == 2:
+@@ -91,6 +95,8 @@ def draw_bodypose(canvas, candidate, subset):
+             mY = np.mean(Y)
+             length = ((X[0] - X[1]) ** 2 + (Y[0] - Y[1]) ** 2) ** 0.5
+             angle = math.degrees(math.atan2(X[0] - X[1], Y[0] - Y[1]))
++            if not _all_finite(mX, mY, length, angle):
++                continue
+             polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), stickwidth), int(angle), 0, 360, 1)
+             cv2.fillConvexPoly(canvas, polygon, colors[i])
+ 
+@@ -102,6 +108,8 @@ def draw_bodypose(canvas, candidate, subset):
+             if index == -1:
+                 continue
+             x, y = candidate[index][0:2]
++            if not _all_finite(x, y):
++                continue
+             x = int(x * W)
+             y = int(y * H)
+             cv2.circle(canvas, (int(x), int(y)), 4, colors[i], thickness=-1)
+@@ -135,6 +143,8 @@ def draw_body_and_foot(canvas, candidate, subset):
+             mY = np.mean(Y)
+             length = ((X[0] - X[1]) ** 2 + (Y[0] - Y[1]) ** 2) ** 0.5
+             angle = math.degrees(math.atan2(X[0] - X[1], Y[0] - Y[1]))
++            if not _all_finite(mX, mY, length, angle):
++                continue
+             polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), stickwidth), int(angle), 0, 360, 1)
+             cv2.fillConvexPoly(canvas, polygon, colors[i])
+ 
+@@ -146,6 +156,8 @@ def draw_body_and_foot(canvas, candidate, subset):
+             if index == -1:
+                 continue
+             x, y = candidate[index][0:2]
++            if not _all_finite(x, y):
++                continue
+             x = int(x * W)
+             y = int(y * H)
+             cv2.circle(canvas, (int(x), int(y)), 4, colors[i], thickness=-1)
+@@ -165,6 +177,8 @@ def draw_handpose(canvas, all_hand_peaks):
+         for ie, e in enumerate(edges):
+             x1, y1 = peaks[e[0]]
+             x2, y2 = peaks[e[1]]
++            if not _all_finite(x1, y1, x2, y2):
++                continue
+             x1 = int(x1 * W)
+             y1 = int(y1 * H)
+             x2 = int(x2 * W)
+@@ -174,6 +188,8 @@ def draw_handpose(canvas, all_hand_peaks):
+ 
+         for i, keyponit in enumerate(peaks):
+             x, y = keyponit
++            if not _all_finite(x, y):
++                continue
+             x = int(x * W)
+             y = int(y * H)
+             if x > eps and y > eps:
+@@ -187,6 +203,8 @@ def draw_facepose(canvas, all_lmks):
+         lmks = np.array(lmks)
+         for lmk in lmks:
+             x, y = lmk
++            if not _all_finite(x, y):
++                continue
+             x = int(x * W)
+             y = int(y * H)
+             if x > eps and y > eps:
+@@ -231,6 +249,8 @@ def handDetect(candidate, subset, oriImg):
+             distanceWristElbow = math.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2)
+             distanceElbowShoulder = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+             width = 1.5 * max(distanceWristElbow, 0.9 * distanceElbowShoulder)
++            if not _all_finite(x, y, width):
++                continue
+             # x-y refers to the center --> offset to topLeft point
+             # handRectangle.x -= handRectangle.width / 2.f;
+             # handRectangle.y -= handRectangle.height / 2.f;
+@@ -246,6 +266,8 @@ def handDetect(candidate, subset, oriImg):
+             width = min(width1, width2)
+             # the max hand box value is 20 pixels
+             if width >= 20:
++                if not _all_finite(x, y, width):
++                    continue
+                 detect_result.append([int(x), int(y), int(width), is_left])
+ 
+     '''
+@@ -303,6 +325,8 @@ def faceDetect(candidate, subset, oriImg):
+ 
+         x -= width
+         y -= width
++        if not _all_finite(x, y, width):
++            continue
+ 
+         if x < 0:
+             x = 0
+@@ -322,6 +346,8 @@ def faceDetect(candidate, subset, oriImg):
+         width = min(width1, width2)
+ 
+         if width >= 20:
++            if not _all_finite(x, y, width):
++                continue
+             detect_result.append([int(x), int(y), int(width)])
+ 
+     return detect_result
+diff --git a/dwpose/wholebody.py b/dwpose/wholebody.py
+index 05bbe0b..b742b6c 100644
+--- a/dwpose/wholebody.py
++++ b/dwpose/wholebody.py
+@@ -6,7 +6,9 @@ from dwpose.onnxdet import inference_detector
+ from dwpose.onnxpose import inference_pose
+ 
+ class Wholebody:
+-    def __init__(self):
++    def __init__(self, det_thresh=0.3, pose_thresh=0.3):
++        self.det_thresh = det_thresh
++        self.pose_thresh = pose_thresh
+         device = 'cuda' # 'cpu' #
+         providers = ['CPUExecutionProvider'
+                   ] if device == 'cpu' else ['CUDAExecutionProvider']
+@@ -17,7 +19,7 @@ class Wholebody:
+         self.session_pose = ort.InferenceSession(path_or_bytes=onnx_pose, providers=providers)
+     
+     def __call__(self, oriImg):
+-        det_result = inference_detector(self.session_det, oriImg)
++        det_result = inference_detector(self.session_det, oriImg, det_thresh=self.det_thresh)
+         keypoints, scores = inference_pose(self.session_pose, det_result, oriImg)
+ 
+         keypoints_info = np.concatenate(
+@@ -26,8 +28,8 @@ class Wholebody:
+         neck = np.mean(keypoints_info[:, [5, 6]], axis=1)
+         # neck score when visualizing pred
+         neck[:, 2:4] = np.logical_and(
+-            keypoints_info[:, 5, 2:4] > 0.3,
+-            keypoints_info[:, 6, 2:4] > 0.3).astype(int)
++            keypoints_info[:, 5, 2:4] > self.pose_thresh,
++            keypoints_info[:, 6, 2:4] > self.pose_thresh).astype(int)
+         new_keypoints_info = np.insert(
+             keypoints_info, 17, neck, axis=1)
+         mmpose_idx = [
+@@ -45,4 +47,3 @@ class Wholebody:
+         
+         return keypoints, scores
+ 
+-
+diff --git a/examples/unianimate_wan/train_unianimate_wan.py b/examples/unianimate_wan/train_unianimate_wan.py
+index 02dffc5..d9ebd5a 100644
+--- a/examples/unianimate_wan/train_unianimate_wan.py
++++ b/examples/unianimate_wan/train_unianimate_wan.py
+@@ -806,6 +806,12 @@ def parse_args():
+         default=1,
+         help="Number of epochs.",
+     )
++    parser.add_argument(
++        "--checkpoint_every_n_train_steps",
++        type=int,
++        default=100,
++        help="Save LoRA checkpoints every N train steps. Set <= 0 to use Lightning's default checkpoint cadence.",
++    )
+     parser.add_argument(
+         "--lora_target_modules",
+         type=str,
+@@ -1003,7 +1009,11 @@ def train(args):
+         strategy=args.training_strategy,
+         default_root_dir=args.output_path,
+         accumulate_grad_batches=args.accumulate_grad_batches,
+-        callbacks=[pl.pytorch.callbacks.ModelCheckpoint(save_top_k=-1)],
++        callbacks=[pl.pytorch.callbacks.ModelCheckpoint(
++            save_top_k=-1,
++            save_last=True,
++            every_n_train_steps=args.checkpoint_every_n_train_steps if args.checkpoint_every_n_train_steps > 0 else None,
++        )],
+         logger=logger,
+     )
+     trainer.fit(model, dataloader)
+@@ -1074,7 +1084,11 @@ def train_onestage(args):
+         strategy=args.training_strategy,
+         default_root_dir=args.output_path,
+         accumulate_grad_batches=args.accumulate_grad_batches,
+-        callbacks=[pl.pytorch.callbacks.ModelCheckpoint(save_top_k=-1, every_n_train_steps=100)], # save checkpoints every_n_train_steps 
++        callbacks=[pl.pytorch.callbacks.ModelCheckpoint(
++            save_top_k=-1,
++            save_last=True,
++            every_n_train_steps=args.checkpoint_every_n_train_steps if args.checkpoint_every_n_train_steps > 0 else None,
++        )], # save checkpoints every_n_train_steps
+         logger=logger,
+     )
+     trainer.fit(model, dataloader)
+diff --git a/requirements.txt b/requirements.txt
+index 79e3b24..9a24f13 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -1,8 +1,8 @@
+ torch>=2.0.0
+ torchvision
+-cupy-cuda12x
++# FastBlend-only dependency; install with the project's `fastblend` extra.
+ transformers==4.46.2
+-controlnet-aux==0.0.7
++# Optional ControlNet processors; install through the `controlnet` extra.
+ imageio
+ imageio[ffmpeg]
+ safetensors
+@@ -11,5 +11,5 @@ sentencepiece
+ protobuf
+ modelscope
+ ftfy
+-matplotlib
+-onnxruntime
++matplotlib==3.10.9
++onnxruntime-gpu==1.27.0
+diff --git a/run_align_pose.py b/run_align_pose.py
+index 86d7a04..fa26ac8 100644
+--- a/run_align_pose.py
++++ b/run_align_pose.py
+@@ -90,10 +90,358 @@ def get_logger(name="essmc2"):
+         logger.addHandler(std_handler)
+     return logger
+ 
++
++OPENPOSE_BODY_JOINT_NAMES = [
++    "nose", "neck", "right_shoulder", "right_elbow", "right_wrist",
++    "left_shoulder", "left_elbow", "left_wrist", "right_hip",
++    "right_knee", "right_ankle", "left_hip", "left_knee",
++    "left_ankle", "right_eye", "left_eye", "right_ear",
++    "left_ear", "right_foot", "left_foot",
++]
++
++
++def safe_ratio(num, den, default=1.0, eps=1e-6):
++    if not np.isfinite(num) or not np.isfinite(den) or abs(float(den)) < eps:
++        return default
++    return num / den
++
++
++def _log_debug(message, logger=None):
++    if logger is not None:
++        logger.warning(message)
++    else:
++        print(message)
++
++
++def debug_body_candidate(tag, result, logger=None):
++    bodies = result.get('bodies', {}) if isinstance(result, dict) else {}
++    candidate = np.asarray(bodies.get('candidate', np.array([])))
++    subset = np.asarray(bodies.get('subset', np.array([])))
++
++    _log_debug(f"[pose-debug:{tag}] candidate shape: {candidate.shape}", logger)
++    if candidate.size == 0:
++        _log_debug(f"[pose-debug:{tag}] candidate is empty", logger)
++    else:
++        xy = candidate[..., :2]
++        finite_xy = np.isfinite(xy)
++        finite_joint_mask = np.all(finite_xy, axis=-1)
++        bad_joint_indices = np.argwhere(~finite_joint_mask)
++        _log_debug(f"[pose-debug:{tag}] finite XY joints: {int(finite_joint_mask.sum())}/{finite_joint_mask.size}", logger)
++        _log_debug(f"[pose-debug:{tag}] NaN/Inf joint indices: {bad_joint_indices.tolist()}", logger)
++        for joint_idx in range(min(candidate.shape[0], len(OPENPOSE_BODY_JOINT_NAMES))):
++            x_finite = bool(np.isfinite(candidate[joint_idx, 0]))
++            y_finite = bool(np.isfinite(candidate[joint_idx, 1]))
++            _log_debug(
++                f"[pose-debug:{tag}] joint {joint_idx:02d} {OPENPOSE_BODY_JOINT_NAMES[joint_idx]}: "
++                f"x_finite={x_finite} y_finite={y_finite} value={candidate[joint_idx, :2].tolist()}",
++                logger,
++            )
++
++    _log_debug(f"[pose-debug:{tag}] subset shape: {subset.shape}", logger)
++    _log_debug(f"[pose-debug:{tag}] subset values: {subset.tolist() if subset.size else []}", logger)
++
++
++def pose_has_invalid_coordinates(result):
++    bodies = result.get('bodies', {}) if isinstance(result, dict) else {}
++    candidate = np.asarray(bodies.get('candidate', np.array([])))
++    if candidate.size == 0:
++        return True
++    return not np.all(np.isfinite(candidate[..., :2]))
++
++
++def validate_pose_before_draw(tag, result, args, logger):
++    if args.debug_pose_failures:
++        debug_body_candidate(tag, result, logger=logger)
++    if pose_has_invalid_coordinates(result):
++        debug_body_candidate(tag, result, logger=logger)
++        message = f"Invalid NaN/Inf pose coordinates before draw_pose at {tag}"
++        if args.skip_invalid_pose_frames:
++            logger.warning("%s; skipping frame because --skip_invalid_pose_frames is set", message)
++            return False
++        raise RuntimeError(message)
++    return True
++
++
++def _valid_xy_mask(points):
++    points = np.asarray(points)
++    return np.isfinite(points[..., :2]).all(axis=-1) & (points[..., 0] >= 0) & (points[..., 1] >= 0)
++
++
++def _interpolate_short_gaps(series, valid, max_gap):
++    """Interpolate short invalid runs in a [T, 2] coordinate series."""
++    out = series.copy()
++    valid = valid.copy()
++    total_frames = out.shape[0]
++    frame_idx = 0
++    while frame_idx < total_frames:
++        if valid[frame_idx]:
++            frame_idx += 1
++            continue
++
++        start = frame_idx
++        while frame_idx < total_frames and not valid[frame_idx]:
++            frame_idx += 1
++        end = frame_idx - 1
++        gap_len = end - start + 1
++        if gap_len > max_gap:
++            continue
++
++        left = start - 1 if start - 1 >= 0 and valid[start - 1] else None
++        right = frame_idx if frame_idx < total_frames and valid[frame_idx] else None
++        if left is None and right is None:
++            continue
++        if left is not None and right is not None:
++            xs = [left, right]
++            target = np.arange(start, end + 1)
++            for coord_idx in range(2):
++                out[start : end + 1, coord_idx] = np.interp(
++                    target,
++                    xs,
++                    [out[left, coord_idx], out[right, coord_idx]],
++                )
++        elif left is not None:
++            out[start : end + 1] = out[left]
++        elif right is not None:
++            out[start : end + 1] = out[right]
++        valid[start : end + 1] = True
++    return out, valid
++
++
++def _smooth_1d(values, window, poly):
++    if len(values) < 3:
++        return values
++    window = int(window)
++    poly = int(poly)
++    if window % 2 == 0:
++        window += 1
++    window = min(window, len(values) if len(values) % 2 == 1 else len(values) - 1)
++    if window < 3 or window <= poly:
++        return values
++    try:
++        from scipy.signal import savgol_filter
++
++        return savgol_filter(values, window_length=window, polyorder=poly, mode="interp")
++    except Exception:
++        pad = window // 2
++        padded = np.pad(values, (pad, pad), mode="edge")
++        kernel = np.ones((window,), dtype=np.float32) / float(window)
++        return np.convolve(padded, kernel, mode="valid")
++
++
++def _reject_temporal_outliers(series, valid, threshold=0.12, local_window=2):
++    """Mark isolated spatial jumps invalid before interpolation/smoothing."""
++    threshold = float(threshold or 0.0)
++    local_window = int(local_window)
++    if threshold <= 0 or local_window <= 0 or int(valid.sum()) < 3:
++        return series, valid, 0
++
++    out = series.copy()
++    out_valid = valid.copy()
++    rejected = np.zeros((out.shape[0],), dtype=bool)
++
++    for frame_idx in range(out.shape[0]):
++        if not out_valid[frame_idx]:
++            continue
++
++        start = max(0, frame_idx - local_window)
++        end = min(out.shape[0], frame_idx + local_window + 1)
++        neighbor_mask = out_valid[start:end].copy()
++        neighbor_mask[frame_idx - start] = False
++        if int(neighbor_mask.sum()) < 2:
++            continue
++
++        neighbors = out[start:end][neighbor_mask]
++        if not np.isfinite(neighbors).all():
++            continue
++
++        local_median = np.median(neighbors, axis=0)
++        residual = float(np.linalg.norm(out[frame_idx] - local_median))
++        if residual <= threshold:
++            continue
++
++        prev_candidates = np.flatnonzero(out_valid[start:frame_idx]) + start
++        next_candidates = np.flatnonzero(out_valid[frame_idx + 1 : end]) + frame_idx + 1
++        has_prev = len(prev_candidates) > 0
++        has_next = len(next_candidates) > 0
++
++        if has_prev and has_next:
++            prev_idx = int(prev_candidates[-1])
++            next_idx = int(next_candidates[0])
++            alpha = (frame_idx - prev_idx) / float(max(next_idx - prev_idx, 1))
++            expected = (1.0 - alpha) * out[prev_idx] + alpha * out[next_idx]
++            interp_residual = float(np.linalg.norm(out[frame_idx] - expected))
++            jump_from_prev = float(np.linalg.norm(out[frame_idx] - out[prev_idx]))
++            jump_to_next = float(np.linalg.norm(out[frame_idx] - out[next_idx]))
++            bridge_motion = float(np.linalg.norm(out[next_idx] - out[prev_idx]))
++            if (
++                interp_residual > threshold
++                and jump_from_prev > threshold
++                and jump_to_next > threshold
++                and bridge_motion <= threshold * 1.5
++            ):
++                rejected[frame_idx] = True
++        elif residual > threshold * 1.5 and int(neighbor_mask.sum()) >= 3:
++            # Endpoint spikes are less certain, so require a stronger residual.
++            rejected[frame_idx] = True
++
++    if rejected.any():
++        out[rejected] = np.nan
++        out_valid[rejected] = False
++
++    return out, out_valid, int(rejected.sum())
++
++
++def _smooth_coordinate_array(
++    points,
++    max_gap=4,
++    window=5,
++    poly=2,
++    outlier_thresh=0.12,
++    outlier_window=2,
++):
++    """Reject spikes, interpolate short gaps, and smooth an array shaped [T, ..., 2]."""
++    points = np.asarray(points, dtype=np.float32)
++    original_shape = points.shape
++    if points.ndim < 3 or original_shape[-1] != 2 or original_shape[0] < 2:
++        valid = _valid_xy_mask(points)
++        return points.copy(), valid, 0
++
++    flat = points.reshape(original_shape[0], -1, 2).copy()
++    valid = _valid_xy_mask(flat)
++    flat[~valid] = np.nan
++    rejected_total = 0
++
++    for joint_idx in range(flat.shape[1]):
++        series = flat[:, joint_idx, :]
++        joint_valid = valid[:, joint_idx]
++        if not joint_valid.any():
++            continue
++
++        series, joint_valid, rejected_count = _reject_temporal_outliers(
++            series,
++            joint_valid,
++            threshold=outlier_thresh,
++            local_window=outlier_window,
++        )
++        rejected_total += rejected_count
++        series, joint_valid = _interpolate_short_gaps(series, joint_valid, int(max_gap))
++        valid[:, joint_idx] = joint_valid
++
++        frame_idx = 0
++        while frame_idx < flat.shape[0]:
++            if not joint_valid[frame_idx]:
++                frame_idx += 1
++                continue
++            start = frame_idx
++            while frame_idx < flat.shape[0] and joint_valid[frame_idx]:
++                frame_idx += 1
++            end = frame_idx
++            if end - start >= 3:
++                for coord_idx in range(2):
++                    series[start:end, coord_idx] = _smooth_1d(series[start:end, coord_idx], window, poly)
++        flat[:, joint_idx, :] = series
++
++    flat[~valid] = -1.0
++    return flat.reshape(original_shape), valid.reshape(original_shape[:-1]), rejected_total
++
++
++def smooth_pose_sequence(
++    results_vis,
++    max_gap=4,
++    window=5,
++    poly=2,
++    outlier_thresh=0.12,
++    hand_outlier_thresh=0.08,
++    outlier_window=2,
++    logger=None,
++):
++    """Smooth aligned DWPose coordinates before rendering pose maps."""
++    if len(results_vis) < 2:
++        return copy.deepcopy(results_vis)
++
++    smoothed = copy.deepcopy(results_vis)
++
++    body = np.stack([pose["bodies"]["candidate"] for pose in smoothed], axis=0)
++    body_smooth, body_valid, body_rejected = _smooth_coordinate_array(
++        body,
++        max_gap=max_gap,
++        window=window,
++        poly=poly,
++        outlier_thresh=outlier_thresh,
++        outlier_window=outlier_window,
++    )
++    for frame_idx, pose in enumerate(smoothed):
++        pose["bodies"]["candidate"] = body_smooth[frame_idx]
++        subset = np.asarray(pose["bodies"]["subset"]).copy()
++        if subset.ndim == 1:
++            subset = subset[np.newaxis, :]
++        for joint_idx in range(min(subset.shape[-1], body_valid.shape[1])):
++            subset[0, joint_idx] = float(joint_idx) if body_valid[frame_idx, joint_idx] else -1.0
++        pose["bodies"]["subset"] = subset
++
++    faces = np.stack([pose["faces"] for pose in smoothed], axis=0)
++    faces_smooth, _, face_rejected = _smooth_coordinate_array(
++        faces,
++        max_gap=max_gap,
++        window=window,
++        poly=poly,
++        outlier_thresh=outlier_thresh,
++        outlier_window=outlier_window,
++    )
++    for frame_idx, pose in enumerate(smoothed):
++        pose["faces"] = faces_smooth[frame_idx]
++
++    hands = np.stack([pose["hands"] for pose in smoothed], axis=0)
++    hands_smooth, _, hand_rejected = _smooth_coordinate_array(
++        hands,
++        max_gap=max_gap,
++        window=window,
++        poly=poly,
++        outlier_thresh=hand_outlier_thresh,
++        outlier_window=outlier_window,
++    )
++    for frame_idx, pose in enumerate(smoothed):
++        pose["hands"] = hands_smooth[frame_idx]
++
++    if logger is not None:
++        logger.info(
++            "Smooth pose outlier rejection marked invalid: body=%s face=%s hands=%s",
++            body_rejected,
++            face_rejected,
++            hand_rejected,
++        )
++
++    return smoothed
++
++
++def save_pose_sequence(results_vis, save_dir, args, logger):
++    os.makedirs(save_dir, exist_ok=True)
++    saved = 0
++    for i in range(len(results_vis)):
++        if not validate_pose_before_draw(f"{save_dir}/frame_{i:04d}_before_draw", results_vis[i], args, logger):
++            continue
++        dwpose_woface, _ = draw_pose(results_vis[i], H=768, W=512)
++        img_path = save_dir + "/" + str(i).zfill(4) + ".jpg"
++        cv2.imwrite(img_path, dwpose_woface)
++        saved += 1
++    return saved
++
++
++def save_reference_pose(pose_ref, save_dir, args, logger):
++    if not validate_pose_before_draw(f"{save_dir}/reference_pose_final_draw", pose_ref, args, logger):
++        logger.warning("Skipping final reference pose draw because reference pose is invalid.")
++        return False
++    dwpose_woface, _ = draw_pose(pose_ref, H=768, W=512)
++    img_path = save_dir + "/" + "pose.jpg"
++    cv2.imwrite(img_path, dwpose_woface)
++    return True
++
++
+ class DWposeDetector:
+-    def __init__(self):
++    def __init__(self, det_thresh=0.3, pose_thresh=0.3):
++        self.pose_thresh = pose_thresh
+ 
+-        self.pose_estimation = Wholebody()
++        self.pose_estimation = Wholebody(det_thresh=det_thresh, pose_thresh=pose_thresh)
+ 
+     def __call__(self, oriImg):
+         oriImg = oriImg.copy()
+@@ -111,18 +459,18 @@ class DWposeDetector:
+             
+             for i in range(len(score)):
+                 for j in range(len(score[i])):
+-                    if score[i][j] > 0.3:
++                    if score[i][j] > self.pose_thresh:
+                         score[i][j] = int(18*i+j)
+                     else:
+                         score[i][j] = -1
+ 
+-            un_visible = subset<0.3
++            un_visible = subset < self.pose_thresh
+             candidate[un_visible] = -1
+ 
+             bodyfoot_score = subset[:,:24].copy()
+             for i in range(len(bodyfoot_score)):
+                 for j in range(len(bodyfoot_score[i])):
+-                    if bodyfoot_score[i][j] > 0.3:
++                    if bodyfoot_score[i][j] > self.pose_thresh:
+                         bodyfoot_score[i][j] = int(18*i+j)
+                     else:
+                         bodyfoot_score[i][j] = -1
+@@ -184,66 +532,129 @@ def draw_pose(pose, H, W):
+     return canvas_without_face, canvas
+ 
+ def dw_func(_id, frame, dwpose_model, dwpose_woface_folder='tmp_dwpose_wo_face', dwpose_withface_folder='tmp_dwpose_with_face'):
+-    
++
+     # frame = cv2.imread(frame_name, cv2.IMREAD_COLOR)
+     pose = dwpose_model(frame)
+ 
+     return pose
+ 
+ 
+-def mp_main(args):
+-    
+-    if args.source_video_paths.endswith('mp4'):
+-        video_paths = [args.source_video_paths]
+-    else:
+-        # video list
+-        video_paths = [os.path.join(args.source_video_paths, frame_name) for frame_name in os.listdir(args.source_video_paths)]
++IMAGE_EXTENSIONS = {".bmp", ".jpeg", ".jpg", ".png", ".webp"}
+ 
+-    
+-    logger.info("There are {} videos for extracting poses".format(len(video_paths)))
+ 
++def create_dwpose_model(args):
+     logger.info('LOAD: DW Pose Model')
+-    dwpose_model = DWposeDetector()  
+-    
++    return DWposeDetector(
++        det_thresh=args.dwpose_det_thresh,
++        pose_thresh=args.dwpose_pose_thresh,
++    )
++
++
++def resolve_pose_input_paths(source_video_paths):
++    if os.path.isdir(source_video_paths):
++        return [
++            os.path.join(source_video_paths, frame_name)
++            for frame_name in sorted(os.listdir(source_video_paths))
++            if os.path.isfile(os.path.join(source_video_paths, frame_name))
++        ]
++    return [source_video_paths]
++
++
++def append_poses_from_input(file_path, source_index, dwpose_model, results_vis):
++    suffix = osp.splitext(file_path)[1].lower()
++    start_count = len(results_vis)
++
++    if suffix in IMAGE_EXTENSIONS:
++        frame = cv2.imread(file_path, cv2.IMREAD_COLOR)
++        if frame is None:
++            logger.warning(f"Could not read frame image {file_path}; skipping.")
++            return 0
++        pose = dw_func(source_index, frame, dwpose_model)
++        results_vis.append(pose)
++        return 1
++
++    videoCapture = cv2.VideoCapture(file_path)
++    while videoCapture.isOpened():
++        # get a frame
++        ret, frame = videoCapture.read()
++        if ret:
++            pose = dw_func(source_index, frame, dwpose_model)
++            results_vis.append(pose)
++        else:
++            break
++    videoCapture.release()
++    return len(results_vis) - start_count
++
++
++def reset_output_dir(path):
++    shutil.rmtree(path, ignore_errors=True)
++    os.makedirs(path, exist_ok=True)
++
++
++def mp_main(args, dwpose_model=None):
++
++    video_paths = resolve_pose_input_paths(args.source_video_paths)
++
++
++    logger.info("There are {} pose input(s) for extracting poses".format(len(video_paths)))
++
++    if dwpose_model is None:
++        dwpose_model = create_dwpose_model(args)
++
+     results_vis = []
+     for i, file_path in enumerate(video_paths):
+         logger.info(f"{i}/{len(video_paths)}, {file_path}")
+-        videoCapture = cv2.VideoCapture(file_path)
+-        while videoCapture.isOpened():
+-            # get a frame
+-            ret, frame = videoCapture.read()
+-            if ret:
+-                pose = dw_func(i, frame, dwpose_model)
+-                results_vis.append(pose)
+-            else:
+-                break
+-        logger.info(f'all frames in {file_path} have been read.')
+-        videoCapture.release()
++        produced = append_poses_from_input(file_path, i, dwpose_model, results_vis)
++        logger.info(f'{produced} frame(s) have been read from {file_path}.')
++        if produced == 0:
++            logger.warning(f"No pose frames were produced for {file_path}; skipping this input.")
+ 
+     # added
+     # results_vis = results_vis[8:]
+     print(len(results_vis))
++    if len(results_vis) == 0:
++        logger.warning("DWPose produced no frames for any input video; nothing to align.")
++        return
+ 
+     ref_name = args.ref_name
+     save_motion = args.saved_pose_dir
+-    os.system(f'rm -rf {save_motion}');
+-    os.makedirs(save_motion, exist_ok=True)
++    reset_output_dir(save_motion)
++    if args.smoothed_saved_pose_dir:
++        reset_output_dir(args.smoothed_saved_pose_dir)
+     save_warp = args.saved_pose_dir
+     # os.makedirs(save_warp, exist_ok=True)
+     
+     ref_frame = cv2.imread(ref_name, cv2.IMREAD_COLOR)
+     
+     
+-    pose_ref = dw_func(i, ref_frame, dwpose_model)
++    pose_ref = dw_func(0, ref_frame, dwpose_model)
+ 
++    if not validate_pose_before_draw("reference_pose", pose_ref, args, logger):
++        logger.warning("Reference pose is invalid and --skip_invalid_pose_frames is set; skipping alignment.")
++        return
+     dwpose_woface, dwpose_wface = draw_pose(pose_ref, H=768, W=512)
+     
+     
++    if args.debug_pose_failures:
++        debug_body_candidate("results_vis[0]_before_use", results_vis[0], logger=logger)
++    while results_vis and pose_has_invalid_coordinates(results_vis[0]):
++        debug_body_candidate("results_vis[0]_before_use_invalid", results_vis[0], logger=logger)
++        message = "Invalid NaN/Inf pose coordinates in results_vis[0] before alignment"
++        if args.skip_invalid_pose_frames:
++            logger.warning("%s; dropping this leading frame because --skip_invalid_pose_frames is set", message)
++            results_vis.pop(0)
++            continue
++        raise RuntimeError(message)
++    if len(results_vis) == 0:
++        logger.warning("All extracted pose frames were invalid; nothing to align.")
++        return
+ 
+     bodies = results_vis[0]['bodies']
+     faces = results_vis[0]['faces']
+     hands = results_vis[0]['hands']
++
+     candidate = bodies['candidate']
++    subset = bodies['subset']
+ 
+     ref_bodies = pose_ref['bodies']
+     ref_faces = pose_ref['faces']
+@@ -273,8 +684,8 @@ def mp_main(args):
+     zero_center1 = 0.5*(candidate[2]+candidate[5])
+     zero_center2 = 0.5*(candidate[8]+candidate[11])
+ 
+-    x_ratio = (ref_5_x-ref_2_x)/(zero_5_x-zero_2_x)
+-    y_ratio = (ref_center2[1]-ref_center1[1])/(zero_center2[1]-zero_center1[1])
++    x_ratio = safe_ratio(ref_5_x-ref_2_x, zero_5_x-zero_2_x)
++    y_ratio = safe_ratio(ref_center2[1]-ref_center1[1], zero_center2[1]-zero_center1[1])
+ 
+     results_vis[0]['bodies']['candidate'][:,0] *= x_ratio
+     results_vis[0]['bodies']['candidate'][:,1] *= y_ratio
+@@ -286,7 +697,7 @@ def mp_main(args):
+     ########neck########
+     l_neck_ref = ((ref_candidate[0][0] - ref_candidate[1][0]) ** 2 + (ref_candidate[0][1] - ref_candidate[1][1]) ** 2) ** 0.5
+     l_neck_0 = ((candidate[0][0] - candidate[1][0]) ** 2 + (candidate[0][1] - candidate[1][1]) ** 2) ** 0.5
+-    neck_ratio = l_neck_ref / l_neck_0
++    neck_ratio = safe_ratio(l_neck_ref, l_neck_0)
+ 
+     x_offset_neck = (candidate[1][0]-candidate[0][0])*(1.-neck_ratio)
+     y_offset_neck = (candidate[1][1]-candidate[0][1])*(1.-neck_ratio)
+@@ -306,7 +717,7 @@ def mp_main(args):
+     l_shoulder2_ref = ((ref_candidate[2][0] - ref_candidate[1][0]) ** 2 + (ref_candidate[2][1] - ref_candidate[1][1]) ** 2) ** 0.5
+     l_shoulder2_0 = ((candidate[2][0] - candidate[1][0]) ** 2 + (candidate[2][1] - candidate[1][1]) ** 2) ** 0.5
+ 
+-    shoulder2_ratio = l_shoulder2_ref / l_shoulder2_0
++    shoulder2_ratio = safe_ratio(l_shoulder2_ref, l_shoulder2_0)
+ 
+     x_offset_shoulder2 = (candidate[1][0]-candidate[2][0])*(1.-shoulder2_ratio)
+     y_offset_shoulder2 = (candidate[1][1]-candidate[2][1])*(1.-shoulder2_ratio)
+@@ -324,7 +735,7 @@ def mp_main(args):
+     l_shoulder5_ref = ((ref_candidate[5][0] - ref_candidate[1][0]) ** 2 + (ref_candidate[5][1] - ref_candidate[1][1]) ** 2) ** 0.5
+     l_shoulder5_0 = ((candidate[5][0] - candidate[1][0]) ** 2 + (candidate[5][1] - candidate[1][1]) ** 2) ** 0.5
+ 
+-    shoulder5_ratio = l_shoulder5_ref / l_shoulder5_0
++    shoulder5_ratio = safe_ratio(l_shoulder5_ref, l_shoulder5_0)
+ 
+     x_offset_shoulder5 = (candidate[1][0]-candidate[5][0])*(1.-shoulder5_ratio)
+     y_offset_shoulder5 = (candidate[1][1]-candidate[5][1])*(1.-shoulder5_ratio)
+@@ -342,7 +753,7 @@ def mp_main(args):
+     l_arm3_ref = ((ref_candidate[3][0] - ref_candidate[2][0]) ** 2 + (ref_candidate[3][1] - ref_candidate[2][1]) ** 2) ** 0.5
+     l_arm3_0 = ((candidate[3][0] - candidate[2][0]) ** 2 + (candidate[3][1] - candidate[2][1]) ** 2) ** 0.5
+ 
+-    arm3_ratio = l_arm3_ref / l_arm3_0
++    arm3_ratio = safe_ratio(l_arm3_ref, l_arm3_0)
+ 
+     x_offset_arm3 = (candidate[2][0]-candidate[3][0])*(1.-arm3_ratio)
+     y_offset_arm3 = (candidate[2][1]-candidate[3][1])*(1.-arm3_ratio)
+@@ -358,7 +769,7 @@ def mp_main(args):
+     l_arm4_ref = ((ref_candidate[4][0] - ref_candidate[3][0]) ** 2 + (ref_candidate[4][1] - ref_candidate[3][1]) ** 2) ** 0.5
+     l_arm4_0 = ((candidate[4][0] - candidate[3][0]) ** 2 + (candidate[4][1] - candidate[3][1]) ** 2) ** 0.5
+ 
+-    arm4_ratio = l_arm4_ref / l_arm4_0
++    arm4_ratio = safe_ratio(l_arm4_ref, l_arm4_0)
+ 
+     x_offset_arm4 = (candidate[3][0]-candidate[4][0])*(1.-arm4_ratio)
+     y_offset_arm4 = (candidate[3][1]-candidate[4][1])*(1.-arm4_ratio)
+@@ -372,7 +783,7 @@ def mp_main(args):
+     l_arm6_ref = ((ref_candidate[6][0] - ref_candidate[5][0]) ** 2 + (ref_candidate[6][1] - ref_candidate[5][1]) ** 2) ** 0.5
+     l_arm6_0 = ((candidate[6][0] - candidate[5][0]) ** 2 + (candidate[6][1] - candidate[5][1]) ** 2) ** 0.5
+ 
+-    arm6_ratio = l_arm6_ref / l_arm6_0
++    arm6_ratio = safe_ratio(l_arm6_ref, l_arm6_0)
+ 
+     x_offset_arm6 = (candidate[5][0]-candidate[6][0])*(1.-arm6_ratio)
+     y_offset_arm6 = (candidate[5][1]-candidate[6][1])*(1.-arm6_ratio)
+@@ -388,7 +799,7 @@ def mp_main(args):
+     l_arm7_ref = ((ref_candidate[7][0] - ref_candidate[6][0]) ** 2 + (ref_candidate[7][1] - ref_candidate[6][1]) ** 2) ** 0.5
+     l_arm7_0 = ((candidate[7][0] - candidate[6][0]) ** 2 + (candidate[7][1] - candidate[6][1]) ** 2) ** 0.5
+ 
+-    arm7_ratio = l_arm7_ref / l_arm7_0
++    arm7_ratio = safe_ratio(l_arm7_ref, l_arm7_0)
+ 
+     x_offset_arm7 = (candidate[6][0]-candidate[7][0])*(1.-arm7_ratio)
+     y_offset_arm7 = (candidate[6][1]-candidate[7][1])*(1.-arm7_ratio)
+@@ -402,7 +813,7 @@ def mp_main(args):
+     l_head14_ref = ((ref_candidate[14][0] - ref_candidate[0][0]) ** 2 + (ref_candidate[14][1] - ref_candidate[0][1]) ** 2) ** 0.5
+     l_head14_0 = ((candidate[14][0] - candidate[0][0]) ** 2 + (candidate[14][1] - candidate[0][1]) ** 2) ** 0.5
+ 
+-    head14_ratio = l_head14_ref / l_head14_0
++    head14_ratio = safe_ratio(l_head14_ref, l_head14_0)
+ 
+     x_offset_head14 = (candidate[0][0]-candidate[14][0])*(1.-head14_ratio)
+     y_offset_head14 = (candidate[0][1]-candidate[14][1])*(1.-head14_ratio)
+@@ -416,7 +827,7 @@ def mp_main(args):
+     l_head15_ref = ((ref_candidate[15][0] - ref_candidate[0][0]) ** 2 + (ref_candidate[15][1] - ref_candidate[0][1]) ** 2) ** 0.5
+     l_head15_0 = ((candidate[15][0] - candidate[0][0]) ** 2 + (candidate[15][1] - candidate[0][1]) ** 2) ** 0.5
+ 
+-    head15_ratio = l_head15_ref / l_head15_0
++    head15_ratio = safe_ratio(l_head15_ref, l_head15_0)
+ 
+     x_offset_head15 = (candidate[0][0]-candidate[15][0])*(1.-head15_ratio)
+     y_offset_head15 = (candidate[0][1]-candidate[15][1])*(1.-head15_ratio)
+@@ -430,7 +841,7 @@ def mp_main(args):
+     l_head16_ref = ((ref_candidate[16][0] - ref_candidate[14][0]) ** 2 + (ref_candidate[16][1] - ref_candidate[14][1]) ** 2) ** 0.5
+     l_head16_0 = ((candidate[16][0] - candidate[14][0]) ** 2 + (candidate[16][1] - candidate[14][1]) ** 2) ** 0.5
+ 
+-    head16_ratio = l_head16_ref / l_head16_0
++    head16_ratio = safe_ratio(l_head16_ref, l_head16_0)
+ 
+     x_offset_head16 = (candidate[14][0]-candidate[16][0])*(1.-head16_ratio)
+     y_offset_head16 = (candidate[14][1]-candidate[16][1])*(1.-head16_ratio)
+@@ -442,7 +853,7 @@ def mp_main(args):
+     l_head17_ref = ((ref_candidate[17][0] - ref_candidate[15][0]) ** 2 + (ref_candidate[17][1] - ref_candidate[15][1]) ** 2) ** 0.5
+     l_head17_0 = ((candidate[17][0] - candidate[15][0]) ** 2 + (candidate[17][1] - candidate[15][1]) ** 2) ** 0.5
+ 
+-    head17_ratio = l_head17_ref / l_head17_0
++    head17_ratio = safe_ratio(l_head17_ref, l_head17_0)
+ 
+     x_offset_head17 = (candidate[15][0]-candidate[17][0])*(1.-head17_ratio)
+     y_offset_head17 = (candidate[15][1]-candidate[17][1])*(1.-head17_ratio)
+@@ -455,7 +866,7 @@ def mp_main(args):
+     ########left leg########
+     l_ll1_ref = ((ref_candidate[8][0] - ref_candidate[9][0]) ** 2 + (ref_candidate[8][1] - ref_candidate[9][1]) ** 2) ** 0.5
+     l_ll1_0 = ((candidate[8][0] - candidate[9][0]) ** 2 + (candidate[8][1] - candidate[9][1]) ** 2) ** 0.5
+-    ll1_ratio = l_ll1_ref / l_ll1_0
++    ll1_ratio = safe_ratio(l_ll1_ref, l_ll1_0)
+ 
+     x_offset_ll1 = (candidate[9][0]-candidate[8][0])*(ll1_ratio-1.)
+     y_offset_ll1 = (candidate[9][1]-candidate[8][1])*(ll1_ratio-1.)
+@@ -469,7 +880,7 @@ def mp_main(args):
+ 
+     l_ll2_ref = ((ref_candidate[9][0] - ref_candidate[10][0]) ** 2 + (ref_candidate[9][1] - ref_candidate[10][1]) ** 2) ** 0.5
+     l_ll2_0 = ((candidate[9][0] - candidate[10][0]) ** 2 + (candidate[9][1] - candidate[10][1]) ** 2) ** 0.5
+-    ll2_ratio = l_ll2_ref / l_ll2_0
++    ll2_ratio = safe_ratio(l_ll2_ref, l_ll2_0)
+ 
+     x_offset_ll2 = (candidate[10][0]-candidate[9][0])*(ll2_ratio-1.)
+     y_offset_ll2 = (candidate[10][1]-candidate[9][1])*(ll2_ratio-1.)
+@@ -482,7 +893,7 @@ def mp_main(args):
+     ########right leg########
+     l_rl1_ref = ((ref_candidate[11][0] - ref_candidate[12][0]) ** 2 + (ref_candidate[11][1] - ref_candidate[12][1]) ** 2) ** 0.5
+     l_rl1_0 = ((candidate[11][0] - candidate[12][0]) ** 2 + (candidate[11][1] - candidate[12][1]) ** 2) ** 0.5
+-    rl1_ratio = l_rl1_ref / l_rl1_0
++    rl1_ratio = safe_ratio(l_rl1_ref, l_rl1_0)
+ 
+     x_offset_rl1 = (candidate[12][0]-candidate[11][0])*(rl1_ratio-1.)
+     y_offset_rl1 = (candidate[12][1]-candidate[11][1])*(rl1_ratio-1.)
+@@ -496,7 +907,7 @@ def mp_main(args):
+ 
+     l_rl2_ref = ((ref_candidate[12][0] - ref_candidate[13][0]) ** 2 + (ref_candidate[12][1] - ref_candidate[13][1]) ** 2) ** 0.5
+     l_rl2_0 = ((candidate[12][0] - candidate[13][0]) ** 2 + (candidate[12][1] - candidate[13][1]) ** 2) ** 0.5
+-    rl2_ratio = l_rl2_ref / l_rl2_0
++    rl2_ratio = safe_ratio(l_rl2_ref, l_rl2_0)
+ 
+     x_offset_rl2 = (candidate[13][0]-candidate[12][0])*(rl2_ratio-1.)
+     y_offset_rl2 = (candidate[13][1]-candidate[12][1])*(rl2_ratio-1.)
+@@ -691,14 +1102,36 @@ def mp_main(args):
+         results_vis[i]['faces'] += offset[np.newaxis, np.newaxis, :]
+         results_vis[i]['hands'] += offset[np.newaxis, np.newaxis, :]
+     
+-    for i in range(len(results_vis)):
+-        dwpose_woface, dwpose_wface = draw_pose(results_vis[i], H=768, W=512)
+-        img_path = save_motion+'/' + str(i).zfill(4) + '.jpg'
+-        cv2.imwrite(img_path, dwpose_woface)
+-    
+-    dwpose_woface, dwpose_wface = draw_pose(pose_ref, H=768, W=512)
+-    img_path = save_warp+'/' + 'pose.jpg'
+-    cv2.imwrite(img_path, dwpose_woface)
++    saved_classic = save_pose_sequence(results_vis, save_motion, args, logger)
++    logger.info("Saved %s classic aligned pose frame(s) to %s", saved_classic, save_motion)
++    save_reference_pose(pose_ref, save_warp, args, logger)
++
++    if args.smoothed_saved_pose_dir:
++        logger.info(
++            (
++                "Creating smoothed/interpolated pose rendering: max_gap=%s window=%s poly=%s "
++                "outlier_thresh=%s hand_outlier_thresh=%s outlier_window=%s"
++            ),
++            args.smooth_pose_max_gap,
++            args.smooth_pose_window,
++            args.smooth_pose_poly,
++            args.smooth_pose_outlier_thresh,
++            args.smooth_pose_hand_outlier_thresh,
++            args.smooth_pose_outlier_window,
++        )
++        smoothed_results_vis = smooth_pose_sequence(
++            results_vis,
++            max_gap=args.smooth_pose_max_gap,
++            window=args.smooth_pose_window,
++            poly=args.smooth_pose_poly,
++            outlier_thresh=args.smooth_pose_outlier_thresh,
++            hand_outlier_thresh=args.smooth_pose_hand_outlier_thresh,
++            outlier_window=args.smooth_pose_outlier_window,
++            logger=logger,
++        )
++        saved_smoothed = save_pose_sequence(smoothed_results_vis, args.smoothed_saved_pose_dir, args, logger)
++        logger.info("Saved %s smoothed aligned pose frame(s) to %s", saved_smoothed, args.smoothed_saved_pose_dir)
++        save_reference_pose(pose_ref, args.smoothed_saved_pose_dir, args, logger)
+ 
+ 
+ logger = get_logger('dw pose extraction')
+@@ -710,9 +1143,20 @@ if __name__=='__main__':
+         parser.add_argument("--ref_name", type=str, default="data/images/IMG_20240514_104337.jpg",)
+         parser.add_argument("--source_video_paths", type=str, default="data/videos/source_video.mp4",)
+         parser.add_argument("--saved_pose_dir", type=str, default="data/saved_pose/IMG_20240514_104337",)
++        parser.add_argument("--dwpose_det_thresh", type=float, default=0.3)
++        parser.add_argument("--dwpose_pose_thresh", type=float, default=0.3)
++        parser.add_argument("--debug_pose_failures", action="store_true")
++        parser.add_argument("--skip_invalid_pose_frames", action="store_true")
++        parser.add_argument("--smoothed_saved_pose_dir", type=str, default=None)
++        parser.add_argument("--smooth_pose_max_gap", type=int, default=4)
++        parser.add_argument("--smooth_pose_window", type=int, default=5)
++        parser.add_argument("--smooth_pose_poly", type=int, default=2)
++        parser.add_argument("--smooth_pose_outlier_thresh", type=float, default=0.12)
++        parser.add_argument("--smooth_pose_hand_outlier_thresh", type=float, default=0.08)
++        parser.add_argument("--smooth_pose_outlier_window", type=int, default=2)
+         args = parser.parse_args()
+ 
+         return args
+         
+     args = parse_args()
+-    mp_main(args)
+\ No newline at end of file
++    mp_main(args)

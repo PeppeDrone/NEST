@@ -1,0 +1,325 @@
+{
+  "effects_vs_v7_manual": [
+    {
+      "contrast": "abl_minus_all - v7_manual, all 16 cells",
+      "estimate": -0.12434895833333334,
+      "ci95": [
+        -0.16536458333333334,
+        -0.08398437500000003
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.1224,
+        "pz16": -0.125,
+        "pz18": -0.1276,
+        "pz25": -0.1224
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_all - v7_manual, amplitude_order",
+      "estimate": 0.018229166666666657,
+      "ci95": [
+        -0.06770833333333331,
+        0.09381510416666575
+      ],
+      "p_sign_flip_two_sided": 0.5,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": -0.0104,
+        "pz18": 0.0208,
+        "pz25": 0.0625
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_all - v7_manual, speed_order",
+      "estimate": -0.34635416666666663,
+      "ci95": [
+        -0.45052083333333337,
+        -0.24479166666666663
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.2708,
+        "pz16": -0.3438,
+        "pz18": -0.4062,
+        "pz25": -0.3646
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_all - v7_manual, moves_more_than_still",
+      "estimate": -0.010416666666666685,
+      "ci95": [
+        -0.03645833333333334,
+        0.0
+      ],
+      "p_sign_flip_two_sided": 0.5,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": -0.0208,
+        "pz18": 0.0,
+        "pz25": -0.0208
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_all - v7_manual, specificity",
+      "estimate": -0.15885416666666669,
+      "ci95": [
+        -0.25,
+        -0.078125
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.2188,
+        "pz16": -0.125,
+        "pz18": -0.125,
+        "pz25": -0.1667
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_balance - v7_manual, all 16 cells",
+      "estimate": 0.0006510416666666574,
+      "ci95": [
+        -0.036458333333333315,
+        0.03125
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": -0.0052,
+        "pz16": 0.0312,
+        "pz18": -0.0078,
+        "pz25": -0.0156
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_balance - v7_manual, amplitude_order",
+      "estimate": 0.026041666666666657,
+      "ci95": [
+        -0.046874999999999944,
+        0.09895833333333334
+      ],
+      "p_sign_flip_two_sided": 0.5,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": 0.0938,
+        "pz18": -0.0417,
+        "pz25": 0.0521
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_balance - v7_manual, speed_order",
+      "estimate": 0.002604166666666713,
+      "ci95": [
+        -0.08854166666666666,
+        0.06510416666666669
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": 0.0417,
+        "pz16": 0.0104,
+        "pz18": 0.0104,
+        "pz25": -0.0521
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_balance - v7_manual, moves_more_than_still",
+      "estimate": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": 0.0,
+        "pz18": 0.0,
+        "pz25": 0.0
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_balance - v7_manual, specificity",
+      "estimate": -0.026041666666666657,
+      "ci95": [
+        -0.10677083333333331,
+        0.04427083333333329
+      ],
+      "p_sign_flip_two_sided": 0.5,
+      "per_patient": {
+        "pz15": -0.0625,
+        "pz16": 0.0208,
+        "pz18": 0.0,
+        "pz25": -0.0625
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_label - v7_manual, all 16 cells",
+      "estimate": -0.10937499999999997,
+      "ci95": [
+        -0.16145833333333334,
+        -0.06315104166666669
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.1224,
+        "pz16": -0.1615,
+        "pz18": -0.0729,
+        "pz25": -0.0807
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_label - v7_manual, amplitude_order",
+      "estimate": -0.03645833333333334,
+      "ci95": [
+        -0.12760416666666669,
+        0.033854166666666685
+      ],
+      "p_sign_flip_two_sided": 0.375,
+      "per_patient": {
+        "pz15": -0.0417,
+        "pz16": -0.0208,
+        "pz18": 0.0208,
+        "pz25": -0.1042
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_label - v7_manual, speed_order",
+      "estimate": -0.25781249999999994,
+      "ci95": [
+        -0.36979166666666663,
+        -0.13541666666666669
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.3021,
+        "pz16": -0.3229,
+        "pz18": -0.2917,
+        "pz25": -0.1146
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_label - v7_manual, moves_more_than_still",
+      "estimate": -0.015625,
+      "ci95": [
+        -0.046875,
+        0.0
+      ],
+      "p_sign_flip_two_sided": 0.5,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": -0.0417,
+        "pz18": 0.0,
+        "pz25": -0.0208
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_label - v7_manual, specificity",
+      "estimate": -0.12760416666666663,
+      "ci95": [
+        -0.2421875,
+        -0.031249999999999972
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": -0.1458,
+        "pz16": -0.2604,
+        "pz18": -0.0208,
+        "pz25": -0.0833
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_magnitude - v7_manual, all 16 cells",
+      "estimate": 0.006510416666666657,
+      "ci95": [
+        -0.024739583333333315,
+        0.038411458333333315
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": -0.0026,
+        "pz16": 0.0443,
+        "pz18": -0.0104,
+        "pz25": -0.0052
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_magnitude - v7_manual, amplitude_order",
+      "estimate": 0.0078125,
+      "ci95": [
+        -0.07291666666666666,
+        0.08854166666666666
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": -0.0417,
+        "pz16": 0.1042,
+        "pz18": -0.0312,
+        "pz25": 0.0
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_magnitude - v7_manual, speed_order",
+      "estimate": 0.026041666666666685,
+      "ci95": [
+        -0.0234375,
+        0.07812499999999997
+      ],
+      "p_sign_flip_two_sided": 0.125,
+      "per_patient": {
+        "pz15": 0.0521,
+        "pz16": 0.0104,
+        "pz18": 0.0208,
+        "pz25": 0.0208
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_magnitude - v7_manual, moves_more_than_still",
+      "estimate": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "p_sign_flip_two_sided": 1.0,
+      "per_patient": {
+        "pz15": 0.0,
+        "pz16": 0.0,
+        "pz18": 0.0,
+        "pz25": 0.0
+      },
+      "n_patients": 4
+    },
+    {
+      "contrast": "abl_minus_magnitude - v7_manual, specificity",
+      "estimate": -0.0078125,
+      "ci95": [
+        -0.08072916666666666,
+        0.06249999999999997
+      ],
+      "p_sign_flip_two_sided": 0.875,
+      "per_patient": {
+        "pz15": -0.0208,
+        "pz16": 0.0625,
+        "pz18": -0.0312,
+        "pz25": -0.0417
+      },
+      "n_patients": 4
+    }
+  ],
+  "note": "Explanatory (PLAN.md \u00a75): effect sizes with CIs; no multiplicity-adjusted claims."
+}

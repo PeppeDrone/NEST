@@ -1,0 +1,15 @@
+# LOCKED Part-A test evaluation (PLAN.md E5). Run ONCE, after analysis/selection/selection.json has
+# been reviewed. Selected EMA checkpoints of V7 manual and automatic (3 seeds each) + baselines on the
+# 5 test infants. Command tests use ALL test clips (more power than the 16-pose validation panel).
+name: test_partA
+split: test
+output_dir: analysis/artifacts/test_partA
+selection_file: analysis/selection/selection.json
+models:
+  - {runs: "v7_*", steps: selected}
+baselines: [static, retrieval_manual, retrieval_automatic]
+stages:
+  validate: {cfg_scale: 2.0, seeds: [31415, 92653], inference_steps: 50}
+  commands: {cfg_scale: 2.0, seeds: [31415, 92653], max_clips: 213, inference_steps: 50, save_trajectories: true}
+  strips: {cfg_scales: [1.0, 2.0, 3.0], seed: 31415, per_patient: 5, require_motion_caption: true, inference_steps: 50}
+  kinematics: {}

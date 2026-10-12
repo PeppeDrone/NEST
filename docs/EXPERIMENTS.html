@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEST experiments</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --ink:#1d2430; --ink-2:#4a5463; --ink-3:#77808e;
+  --line:#e3e1db; --accent:#0072B2; --accent-soft:#e6f1f8; --warm:#C26A00; --warm-soft:#fbf0e3;
+  --code:#f2f0ea; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --surface:#1b1f26; --ink:#e7e9ee; --ink-2:#b4bac5; --ink-3:#8b93a0;
+    --line:#2c323c; --accent:#5aaee0; --accent-soft:#16283a; --warm:#e5a25a; --warm-soft:#2e2316;
+    --code:#232831; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --surface:#1b1f26; --ink:#e7e9ee; --ink-2:#b4bac5; --ink-3:#8b93a0;
+  --line:#2c323c; --accent:#5aaee0; --accent-soft:#16283a; --warm:#e5a25a; --warm-soft:#2e2316;
+  --code:#232831; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Inter","Helvetica Neue",Helvetica,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding-block:40px 80px;padding-inline:20px}
+header h1{font-size:1.9rem;line-height:1.2;margin:0 0 6px}
+header p.sub{color:var(--ink-2);margin:0 0 22px;max-width:760px}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:0 0 30px}
+nav.toc ol{margin:6px 0 0;padding-left:20px;columns:2;column-gap:32px}
+nav.toc li{margin:2px 0;break-inside:avoid}
+nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--ink-3)}
+h2{font-size:1.3rem;margin:46px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h2 .n{color:var(--accent);margin-right:8px}
+h3{font-size:1.02rem;margin:22px 0 6px}
+p{margin:8px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:14px 0}
+.grid{display:grid;grid-template-columns:150px 1fr;gap:6px 16px}
+.grid dt{color:var(--ink-3);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.grid dd{margin:0}
+@media (max-width:640px){.grid{grid-template-columns:1fr}.grid dt{margin-top:8px} nav.toc ol{columns:1}}
+.finding{background:var(--accent-soft);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px}
+.caveat{background:var(--warm-soft);border-left:3px solid var(--warm);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font:.84em/1.4 "SF Mono",Menlo,Consolas,monospace}
+ul{margin:6px 0;padding-left:22px}
+li{margin:3px 0}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:600}
+.glossary dt{font-weight:600;margin-top:8px}
+.glossary dd{margin:0 0 0 0;color:var(--ink-2)}
+footer{margin-top:50px;color:var(--ink-3);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<h1>NEST: experiments and analyses</h1>
+<p class="sub">A complete, self-contained account of every experiment and analysis behind the manuscript <em>“Controllable neonatal motion from a single frame and sparse movement specifications”</em>. It assumes no prior knowledge of the project: the first section explains the task, the data and the model; each later section states why an experiment was run, how it was done, what was measured, and what it showed.</p>
+</header>
+
+<nav class="toc"><strong>Contents</strong>
+<ol>
+<li><a href="#context">Background: task, data, model</a></li>
+<li><a href="#terms">Key terms</a></li>
+<li><a href="#training">Training runs</a></li>
+<li><a href="#selection">Checkpoint selection</a></li>
+<li><a href="#partA">Manual vs automatic captions</a></li>
+<li><a href="#infants">Individual infants</a></li>
+<li><a href="#partB">Loss ablations</a></li>
+<li><a href="#mechanism">Mechanism and training dynamics</a></li>
+<li><a href="#guidance">Guidance sweep</a></li>
+<li><a href="#calibration">Calibration and diversity</a></li>
+<li><a href="#paraphrase">Paraphrase robustness</a></li>
+<li><a href="#stage2">Trajectory to video (Stage 2)</a></li>
+<li><a href="#stats">Statistics used throughout</a></li>
+<li><a href="#repro">Reproducibility checks</a></li>
+</ol>
+</nav>
+
+<h2 id="context"><span class="n">1</span>Background: task, data, model</h2>
+<h3>The task</h3>
+<p>Given a <strong>single photograph of a newborn</strong> (from which a 2D skeleton is extracted) and a <strong>short description of a movement</strong> — for example “the newborn moves its left leg with high amplitude and fast speed” — generate a plausible <strong>4.75-second motion trajectory</strong> of that infant: 20 frames of 20 body keypoints (nose, eyes, ears, neck, shoulders, elbows, wrists, hips, knees, ankles, feet). The motivation is clinical: spontaneous infant movements are assessed by clinicians, and a generator that can be <em>steered</em> by a clinical description could support data augmentation, teaching, and controllable video synthesis.</p>
+
+<h3>The data</h3>
+<ul>
+<li>1,203 short clips of neonates from clinical video recordings. Skeletons were extracted with DWPose (an off-the-shelf pose estimator) and quality-filtered.</li>
+<li>A fixed split by infant (never by clip): 875 training clips from 33 infants, 115 validation clips from 4 infants, 213 test clips from 5 infants. Test infants were used only once, for the final locked evaluation.</li>
+<li>Every clip has two descriptions:
+  <ul>
+  <li><strong>Manual captions</strong>: written from a structured clinical form — which limbs move, amplitude (low/high), speed (slow/fast) — and turned into a sentence by a fixed template.</li>
+  <li><strong>Automatic captions</strong>: produced by a generic video captioner on the same clips; most read “the newborn is lying still” and none grade amplitude or speed.</li>
+  </ul></li>
+<li>Clips are grouped by <strong>caption type</strong> according to the manual caption: still/none, 1 limb, 2 limbs, 3–4 limbs.</li>
+</ul>
+
+<h3>The model (called V7 during development, NEST in the paper)</h3>
+<ul>
+<li>A <strong>diffusion model</strong> (2.1 M parameters) that generates the motion as displacements from the observed starting pose, in body-size units.</li>
+<li>It is conditioned on the starting pose, on the sentence encoded by a frozen CLIP text encoder, and on four <strong>limb tokens</strong> produced by a rule-based parser of the sentence (for each limb: mentioned?, moving?, amplitude grade, speed grade).</li>
+<li>Training loss: reconstruction of the recorded future, a visibility term, a per-limb <strong>magnitude</strong> term (each limb should move as much as in the recording) and a <strong>label-consistent</strong> term (motion must respect bounds implied by the label, e.g. a “fast” limb must exceed a minimum speed). Clips are sampled with weights that rebalance rare caption types.</li>
+<li>Sampling uses 50 DDIM steps and classifier-free guidance with weight 2.</li>
+</ul>
+
+<h2 id="terms"><span class="n">2</span>Key terms</h2>
+<div class="card"><dl class="glossary">
+<dt>Teacher</dt><dd>The real, recorded motion of the infant (pose extracted from the video). Used as reference.</dd>
+<dt>Paired counterfactual commands</dt><dd>The core evaluation. From the same starting pose and the same random noise, the model is asked to perform 13 different commands: “lying still” and, for each of the 4 limbs, “low amplitude &amp; slow”, “high amplitude &amp; slow”, “high amplitude &amp; fast”. Because only the instruction differs, any difference in the output is caused by the instruction.</dd>
+<dt>Command tests (16 cells)</dt><dd>For each limb, four yes/no checks: <em>amplitude order</em> (high/slow moves the limb more than low/slow), <em>speed order</em> (high/fast is faster than high/slow), <em>moves vs still</em> (high/fast moves more than the still command), <em>limb selectivity</em> (the commanded limb gains more motion than every other limb). 4 tests × 4 limbs = 16 cells; the primary endpoint is the mean success over the 16 cells.</dd>
+<dt>Amplitude ratio</dt><dd>Generated motion divided by the recorded motion of the same clip (1 = as much as the real infant).</dd>
+<dt>Body units</dt><dd>Distances divided by the infant's torso length, so that infants of different size and camera distance are comparable.</dd>
+<dt>Training seed / noise seed</dt><dd>A training seed is an independent replicate of the whole training; a noise seed is a different random draw when sampling from one trained model.</dd>
+<dt>EMA snapshot</dt><dd>A smoothed copy of the model weights saved every 200 training steps; checkpoints are chosen among these.</dd>
+</dl></div>
+
+<h2 id="training"><span class="n">3</span>Training runs</h2>
+<div class="card"><dl class="grid">
+<dt>Purpose</dt><dd>Produce the models compared in the paper, with replicates so that results do not depend on one lucky training run.</dd>
+<dt>Design</dt><dd>
+<ul>
+<li><strong>Manual captions</strong>: 3 training seeds (42, 43, 44).</li>
+<li><strong>Automatic captions</strong>: 3 training seeds. Identical clips, split, architecture, hyperparameters and — importantly — identical clip-sampling probabilities (computed once from the manual captions and reused), so the two conditions differ <em>only</em> in the caption text.</li>
+<li><strong>Ablations of the manual model</strong>, 3 seeds each: without all motion terms (reconstruction only), without the label-consistent term, without the magnitude term, without caption-balanced sampling.</li>
+<li>18 runs in total. Each starts with 1,000 steps where captions are hidden (learning a pose-only motion prior), then trains with captions, validating every 200 steps and stopping after 20 rounds without improvement.</li>
+</ul></dd>
+<dt>Outputs</dt><dd><code>runs/&lt;run&gt;/</code> (local, not distributed); the selected checkpoints are released separately (see README).</dd>
+</dl></div>
+
+<h2 id="selection"><span class="n">4</span>Checkpoint selection (validation infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Purpose</dt><dd>Choose one checkpoint per run in a way that is fixed in advance and identical for all runs, so that no comparison benefits from favourable picking.</dd>
+<dt>Design</dt><dd>Every EMA snapshot of every run was evaluated on the validation infants (reconstruction metrics, the 16 command tests, kinematics). A rule written before the replicate runs were trained was then applied: take the <em>earliest</em> snapshot where all 16 cells reach 0.80; if none does, take the snapshot with the best worst cell. Test infants played no role.</dd>
+<dt>Outputs</dt><dd><code>analysis/selection/selection.json</code>; full sweep in <code>analysis/artifacts/val/</code>.</dd>
+</dl></div>
+
+<h2 id="partA"><span class="n">5</span>Main comparison: manual vs automatic captions (test infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Question</dt><dd>Is a few seconds of structured manual labelling a better interface to specify an infant's motion than automatic captions?</dd>
+<dt>Design</dt><dd>
+<ul>
+<li>The 13 commands were run on all 213 test clips, with 2 noise seeds, for the selected checkpoint of each of the 6 manual and automatic runs.</li>
+<li>Baselines on the same tests: a <em>static copy</em> of the first frame (never moves), and <em>retrieval</em> (copy the motion of a training clip with compatible label and similar pose), with manual and with automatic labels.</li>
+<li>Every test clip was also generated with its own caption, to measure: amplitude ratio by caption type, position error against the recording, whether motion concentrates in the labelled limb, and realism of joint kinematics (speed, acceleration, jerk, path length, elbow/knee range, bone-length variation) compared with recorded infants.</li>
+<li>A prespecified <em>gate</em>: the comparison of ablations on the test infants would only be run if manual beat automatic on test.</li>
+</ul></dd>
+<dt>Key result</dt><dd><div class="finding">Mean command success 0.95 (manual) vs 0.62 (automatic); patient-level difference +0.33 (95% CI +0.28 to +0.38). The gap lies in speed (0.91 vs 0.38) and limb selectivity (0.95 vs 0.27) — exactly what automatic captions never express. Gate passed.</div>
+<div class="caveat">The manual model over-moves rich multi-limb descriptions and under-moves still captions relative to the test infants; position error is slightly lower for the automatic model, because it moves less.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/artifacts/test_partA/</code> (per-model trajectories, metrics, statistics in <code>stats/</code>).</dd>
+</dl></div>
+
+<h2 id="infants"><span class="n">6</span>Individual infants</h2>
+<div class="card"><dl class="grid">
+<dt>Purpose</dt><dd>Show the group results on single infants, chosen by a rule rather than by appearance.</dd>
+<dt>Design</dt><dd>The test infant with median manual command success and, within it, the median clip with all limbs visible were selected. Both manual and automatic models (seed 42) generated the 13 commands plus the clip's own caption, 8 noise seeds each. Separately, one clip per caption type was shown with the recording, both models and retrieval.</dd>
+<dt>Key result</dt><dd><div class="finding">For the selected infant the manual model moves the commanded limb 1.3–14× faster than the other limbs and orders amplitude and speed; the automatic model moves the commanded limb no more than the others, and its large excursions are single-frame jumps.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/artifacts/hero/</code>; Figs. 4–5.</dd>
+</dl></div>
+
+<h2 id="partB"><span class="n">7</span>Loss ablations of the manual model (test infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Question</dt><dd>Which parts of the model's training recipe make the manual model controllable?</dd>
+<dt>Design</dt><dd>The same command tests, caption metrics and kinematics were run for the 12 ablation models (4 arms × 3 seeds) and compared with the full manual model.</dd>
+<dt>Key result</dt><dd><div class="finding">Removing the label-consistent term lowers mean command success from 0.95 to 0.86 (Δ −0.09, CI −0.11 to −0.06), mostly through speed (0.91 → 0.64); removing all motion terms gives 0.84. Removing the magnitude term or caption balancing has small effects with intervals spanning zero, but those runs train much longer before stopping. Without the label term still captions move more (0.31 → 0.60 of the recorded motion).</div></dd>
+<dt>Outputs</dt><dd><code>analysis/artifacts/test_partB/</code>; Fig. 7, Table 4.</dd>
+</dl></div>
+
+<h2 id="mechanism"><span class="n">8</span>Mechanism and training dynamics (validation infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Purpose</dt><dd>Understand <em>why</em> the models behave as they do, without touching the test set.</dd>
+<dt>Design</dt><dd>
+<ul>
+<li><strong>Fixed-noise timestep probe</strong>: at early, selected and final checkpoints, how much motion does the model's internal “clean motion” estimate contain at each noise level, with and without the caption?</li>
+<li>Generated amplitude over training for the full model vs the reconstruction-only ablation.</li>
+<li>Command success and worst cell over training, manual vs automatic.</li>
+<li>Control vs accuracy trade-off across every saved snapshot.</li>
+</ul></dd>
+<dt>Key result</dt><dd><div class="finding">Command following emerges within 1,000–2,000 conditional steps for the manual model. At high noise the clean-motion estimate is attenuated early in training and recovers later; reconstruction error does not track controllability.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/artifacts/probe/</code>, <code>analysis/artifacts/val/</code>; Figs. 8 and 9.</dd>
+</dl></div>
+
+<h2 id="guidance"><span class="n">9</span>Guidance sweep (validation infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Purpose</dt><dd>Check how the guidance weight (how strongly the model follows the caption) affects motion.</dd>
+<dt>Design</dt><dd>Selected manual and automatic checkpoints evaluated at guidance 1.0, 1.5, 2.0, 2.5 and 3.0.</dd>
+<dt>Key result</dt><dd><div class="finding">Higher guidance increases motion for multi-limb descriptions and decreases it for still captions; bone-length distortion does not increase up to the default of 2.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/artifacts/val_guidance/</code>; Fig. 9c–d.</dd>
+</dl></div>
+
+<h2 id="calibration"><span class="n">10</span>Calibration and diversity (test infants, CPU only)</h2>
+<div class="card"><dl class="grid">
+<dt>Question</dt><dd>Does the generated motion scale with how vigorously the real infant moved, and how much do samples vary?</dd>
+<dt>Design</dt><dd>
+<ul>
+<li><strong>Calibration</strong>: across clips, the slope of log generated vs log recorded amplitude (1 = proportional, 0 = ignores the infant) and rank correlations, overall and within each caption type.</li>
+<li><strong>Diversity</strong>: distance between the two noise-seed samples of each clip, absolute and relative to the motion produced; and pairwise distance over 8 samples per command for the single infant.</li>
+</ul></dd>
+<dt>Key result</dt><dd><div class="finding">Manual: slope 0.93 vs 0.37 for automatic. Automatic samples differ about as much as they move (relative spread 1.05), manual samples are more consistent (0.66). Without the label term, motion tracks the individual infant more within a caption type but scales less across caption types.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/diversity_calibration.py</code> → <code>analysis/artifacts/diversity_calibration/</code>; rows in Table 2.</dd>
+</dl></div>
+
+<h2 id="paraphrase"><span class="n">11</span>Paraphrase robustness (test infants, CPU only)</h2>
+<div class="card"><dl class="grid">
+<dt>Question</dt><dd>If a clinician describes the same movement in their own words, does the generated motion change, and does it become less accurate?</dd>
+<dt>Design</dt><dd>
+<ul>
+<li>The 213 test clips share 80 distinct manual captions. For each, 2 free paraphrases were written by a large language model (Claude Opus 5.5) under fixed rules — keep the same limbs, moving/still status and amplitude/speed grades; describe freely in clinical terms; no movement-quality terms — giving 160 paraphrases. The file was frozen by checksum before any analysis and never edited.</li>
+<li>Each paraphrase was passed through the rule-based parser and labelled <em>tokens kept</em> (the model receives the same limb tokens, only the free text differs) or <em>tokens changed</em>.</li>
+<li>One manual model (seed 42, the replica with the highest validation success) generated every test clip under its original caption and under each paraphrase, with the same pose and noise.</li>
+<li>Measures: how much rewording moves the trajectory compared with changing the noise seed; position error, amplitude ratio, labelled-limb concentration and calibration under each caption.</li>
+</ul></dd>
+<dt>Key result</dt><dd><div class="finding">The paraphrases are genuinely free: 36% keep exactly the original tokens. When they do, rewording moves the trajectory about half as much as a new noise seed and accuracy is unchanged. When they don't, generation degrades gracefully: the described limb still dominates, while the graded amount of motion drifts toward a default (about a quarter smaller).</div>
+<div class="caveat">For still captions whose stillness is not recognised the wording/noise ratio is high only because the model is nearly deterministic when told “still” (near-zero denominator); the absolute change is tiny.</div></dd>
+<dt>Outputs</dt><dd><code>analysis/paraphrase/</code> (frozen <code>paraphrases_v1.json</code>, parser check, scripts) → <code>analysis/artifacts/paraphrase/</code>; Fig. 6, Table 3.</dd>
+</dl></div>
+
+<h2 id="stage2"><span class="n">12</span>From trajectory to video: end-to-end demonstration (test infants)</h2>
+<div class="card"><dl class="grid">
+<dt>Question</dt><dd>Can the generated trajectories drive a video model, and does the resulting video follow the trajectory it was given?</dd>
+<dt>Design</dt><dd>
+<ul>
+<li>All 1,278 manual test trajectories were screened for clean conversion to video controls; 24 were shortlisted (6 per caption type). The selection is favourable, so this is a demonstration, not a benchmark.</li>
+<li>A “bridge” resamples each 20-frame trajectory to 81 frames, applies anatomical constraints and draws it as skeleton images.</li>
+<li>A frozen, off-the-shelf video model (UniAnimate-DiT on Wan2.1, 14 B parameters) animated the infant's real photograph to follow these skeletons: 480×832 pixels, 81 frames, 100 denoising steps.</li>
+<li><strong>Follow-through</strong>: the pose estimator was run on every generated frame. Because the video model re-places the skeleton on the infant in the photograph, motion (displacement from the first frame) is compared, not absolute position. Each video was compared with its own trajectory and, as a reference, with the trajectories of the other clips.</li>
+<li>Faces are blurred in all figures.</li>
+</ul></dd>
+<dt>Key result</dt><dd><div class="finding">Each video follows its own trajectory more closely than other clips' trajectories (motion error 13.9 vs 16.7 video pixels; lower for 21 of 24 videos from 5 infants; Wilcoxon p &lt; 0.001). Vigorous multi-limb motion is reproduced in amount (ratio about 1.0) and timing (correlation about 0.5).</div>
+<div class="caveat">Small single-limb motions (about 4 pixels) are below the noise of pose estimation on video (about 5.2 pixels) and cannot be measured this way; the pose estimator often misses wrists in generated frames.</div></dd>
+<dt>Outputs</dt><dd>Scripts in <code>stage2/</code> (videos are generated locally in <code>stage2/run/</code>, not distributed); analysis in <code>analysis/stage2/followthrough.py</code> → <code>analysis/artifacts/stage2/</code>; Fig. 10.</dd>
+</dl></div>
+
+<h2 id="stats"><span class="n">13</span>Statistics used throughout</h2>
+<div class="card">
+<ul>
+<li><strong>The infant is the unit of inference</strong>: results are averaged within infant before comparing conditions, so infants with many clips do not dominate.</li>
+<li><strong>Hierarchical bootstrap</strong> (resampling infants, clips within infants and training runs) for 95% confidence intervals.</li>
+<li><strong>Exact sign-flip tests</strong> over infants; with 5 test infants the smallest possible p is 1/32 (one-sided) or 1/16 (two-sided), so conclusions rest on effect sizes and intervals. Holm correction for secondary manual-vs-automatic tests.</li>
+<li><strong>Wilcoxon signed-rank tests</strong> over videos for the Stage-2 paired comparisons.</li>
+<li>Noise seeds are treated as repeated measures, never as independent samples.</li>
+</ul>
+</div>
+
+<h2 id="repro"><span class="n">14</span>Reproducibility checks</h2>
+<div class="card">
+<ul>
+<li>Forced recomputation of evaluations is byte-identical (fixed per-clip noise, text prompts encoded one at a time, non-deterministic GPU kernels disabled).</li>
+<li>Manual and automatic runs share identical sampling probabilities, confirmed by identical training losses during the caption-free warm-up.</li>
+<li>The self-contained code reproduces the original implementation's training losses and evaluation numbers.</li>
+<li>CPU and GPU generations agree closely (mean coordinate difference about 50× smaller than the paraphrase effect).</li>
+<li>Every number, table and figure in the manuscript is regenerated from the saved analysis outputs by <code>manuscript/compile.sh</code>.</li>
+</ul>
+</div>
+
+<footer>Repository root: <code>NEST/</code>. Figure and table numbers refer to the build of <code>manuscript/main.pdf</code>.</footer>
+</div>
+</body>
+</html>

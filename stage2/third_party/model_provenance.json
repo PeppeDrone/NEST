@@ -1,0 +1,40 @@
+{
+  "format_version": 1,
+  "project": "NEST (Stage-2 video synthesis dependencies)",
+  "unianimate": {
+    "repository": "https://github.com/ali-vilab/UniAnimate-DiT.git",
+    "commit": "61d882c25385042f0cf5bcdaf6853238d9756d68",
+    "local_patch": "stage2/third_party/unianimate-61d882c.patch",
+    "local_patch_sha256": "59ab2f15e0cfffecadd3b9ac9062286db0aeb8e3d4c3170c380814c39b44a25f"
+  },
+  "clip_text_tower": {
+    "repository": "https://huggingface.co/openai/clip-vit-large-patch14",
+    "revision": "32bd64288804d66eefd0ccbe215aa642df71cc41",
+    "model_file": "model.safetensors",
+    "model_sha256": "a2bf730a0c7debf160f7a6b50b3aaf3703e7e88ac73de7a314903141db026dcb"
+  },
+  "models": {
+    "yolox_l.onnx": "7860ae79de6c89a3c1eb72ae9a2756c0ccfbe04b7791bb5880afabd97855a411",
+    "dw-ll_ucoco_384.onnx": "724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843",
+    "UniAnimate-Wan2.1-14B-Lora-12000.ckpt": "cc4d21ea1eef08b74d76f3e19d56ec281a959766e7cf0116a72bd9414a1c04de",
+    "Wan2.1_VAE.pth": "38071ab59bd94681c686fa51d75a1968f64e470262043be31f7a094e442fd981",
+    "models_t5_umt5-xxl-enc-bf16.pth": "7cace0da2b446bbbbc57d031ab6cf163a3d59b366da94e5afe36745b746fd81d",
+    "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth": "628c9998b613391f193eb67ff68da9667d75f492911e4eb3decf23460a158c38",
+    "special_tokens_map.json": "7b8a9f5040adb67b5805abdfd42c1f8d0f3d0e711f10726580eb3789cd0ad61d",
+    "spiece.model": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458",
+    "tokenizer.json": "6e197b4d3dbd71da14b4eb255f4fa91c9c1f2068b20a2de2472967ca3d22602b",
+    "tokenizer_config.json": "ed9a3a8b0faa71a70a32847e0435fe036e6e112d4df4edb7bb48a921e344dc05",
+    "diffusion_pytorch_model-00001-of-00007.safetensors": "3c36c371b3060931770f693f22253a7de7c76fc79cffb0ab08032fb5a04784e4",
+    "diffusion_pytorch_model-00002-of-00007.safetensors": "eb465c3d3ec91bf5562f8f9c1a7cbb010266012f255d05d0d5c8815524a1dd43",
+    "diffusion_pytorch_model-00003-of-00007.safetensors": "072ebcc282f2d35c016c22fbc46e1c8eefa85745b9038ca4eea9e34cf4a47186",
+    "diffusion_pytorch_model-00004-of-00007.safetensors": "3b3e8561340ad1d43e4569912810fdc24f83ddbcf4f2863c968114479113324b",
+    "diffusion_pytorch_model-00005-of-00007.safetensors": "9700f2ba6194aad23a458adc6e73352ea982a0b1c7606f459cd3e559eacc270d",
+    "diffusion_pytorch_model-00006-of-00007.safetensors": "148e81b477494ef9590acd8983f45116d4684919659ea2c0e747050458aa2346",
+    "diffusion_pytorch_model-00007-of-00007.safetensors": "19f7ff97683bdbe3ee9ddada6f85d3e5d91a9b871a3beffdb5f19a1cc6208647"
+  },
+  "notes": [
+    "Patient data and Wan model shards are deliberately not tracked in Git.",
+    "The reviewed local patch captures tracked UniAnimate source modifications against the pinned commit.",
+    "All local Wan, DWPose, and official UniAnimate adapter artifacts required by preflight have fixed SHA-256 values."
+  ]
+}

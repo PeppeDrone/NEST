@@ -1,0 +1,112 @@
+{
+  "primary": {
+    "contrast": "manual - automatic, all 16 cells",
+    "estimate": 0.3334420349042991,
+    "ci95": [
+      0.28155500315656556,
+      0.38426560436746166
+    ],
+    "p_sign_flip_one_sided": 0.03125,
+    "per_patient": {
+      "pz11": 0.3577,
+      "pz17": 0.3462,
+      "pz26": 0.2795,
+      "pz28": 0.3542,
+      "pz73": 0.3296
+    },
+    "n_patients": 5
+  },
+  "secondary": [
+    {
+      "contrast": "manual - automatic, amplitude_order",
+      "estimate": 0.12238292629802065,
+      "ci95": [
+        0.057755971099131484,
+        0.19157028761333003
+      ],
+      "p_sign_flip_one_sided": 0.03125,
+      "per_patient": {
+        "pz11": 0.1069,
+        "pz17": 0.1326,
+        "pz26": 0.1125,
+        "pz28": 0.125,
+        "pz73": 0.1349
+      },
+      "n_patients": 5,
+      "p_holm": 0.15625
+    },
+    {
+      "contrast": "manual - automatic, speed_order",
+      "estimate": 0.5289719295379672,
+      "ci95": [
+        0.34739954889188374,
+        0.7029576160867435
+      ],
+      "p_sign_flip_one_sided": 0.03125,
+      "per_patient": {
+        "pz11": 0.5928,
+        "pz17": 0.5644,
+        "pz26": 0.4014,
+        "pz28": 0.5833,
+        "pz73": 0.503
+      },
+      "n_patients": 5,
+      "p_holm": 0.15625
+    },
+    {
+      "contrast": "manual - automatic, moves_more_than_still",
+      "estimate": 0.0042144831059925504,
+      "ci95": [
+        0.0,
+        0.013231702979934114
+      ],
+      "p_sign_flip_one_sided": 0.0625,
+      "per_patient": {
+        "pz11": 0.0024,
+        "pz17": 0.0008,
+        "pz26": 0.0125,
+        "pz28": 0.0,
+        "pz73": 0.0055
+      },
+      "n_patients": 5,
+      "p_holm": 0.15625
+    },
+    {
+      "contrast": "manual - automatic, specificity",
+      "estimate": 0.6781988006752157,
+      "ci95": [
+        0.6277270472582972,
+        0.7190201033243486
+      ],
+      "p_sign_flip_one_sided": 0.03125,
+      "per_patient": {
+        "pz11": 0.7288,
+        "pz17": 0.6871,
+        "pz26": 0.5917,
+        "pz28": 0.7083,
+        "pz73": 0.6751
+      },
+      "n_patients": 5,
+      "p_holm": 0.15625
+    },
+    {
+      "contrast": "body_scale_error, automatic - manual (positive favours manual)",
+      "estimate": -0.016091136221645406,
+      "p_sign_flip_one_sided": 0.75,
+      "per_patient": {
+        "pz11": -0.009,
+        "pz17": -0.0122,
+        "pz26": -0.0827,
+        "pz28": -0.0001,
+        "pz73": 0.0235
+      },
+      "p_holm": 0.75
+    }
+  ],
+  "absolute": {
+    "v7_manual": 0.9496683904407961,
+    "v7_automatic": 0.6162263555364971
+  },
+  "gate_passed": true,
+  "note": "With n patients the smallest attainable exact one-sided p is 1/2^n; the CI and the per-patient differences carry the evidence."
+}

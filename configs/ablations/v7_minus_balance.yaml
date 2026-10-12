@@ -1,0 +1,41 @@
+# V7 ablation arm 'v7_minus_balance': caption-balanced sampling off (V5 patient x activity law).
+# Identical to configs/v7.yaml except the lines marked ABLATION.
+# V7 = V6 (V5 + per-limb motion terms + control-class balancing) with a stronger label
+# term (0.2 -> 0.5) and an inference-only EMA snapshot saved at every validation round.
+# Identical recipe for manual and automatic prompt conditions.
+version: 7
+width: 128
+layers: 4
+heads: 4
+dropout: 0.1
+batch_size: 16
+accumulation: 4
+learning_rate: 0.0003
+weight_decay: 0.01
+max_steps: 20000
+warmup_steps: 200
+prior_steps: 1000
+validate_every: 200
+log_every: 20
+patience: 20
+min_steps: 2000
+ema_decay: 0.99
+ema_burnin: 100
+condition_dropout: 0.1
+diffusion_steps: 1000
+inference_steps: 50
+# Validation/selection and default inference guidance (V5 check: 2.0 gives teacher-level motion).
+cfg_scale: 2.0
+visibility_weight: 0.1
+velocity_weight: 0.0
+residual_scale_floor: 0.05
+# Motion terms (see src/neomotion/motion.py).
+magnitude_weight: 0.2
+label_weight: 0.5
+label_quantile: 0.25
+motion_eps: 0.02
+control_balance_power: 0.0   # ABLATION (was 0.5)
+# Draw probabilities come from the manual captions for BOTH runs (identical sampling law).
+sampling_caption_source: manual
+validation_seeds: [31415, 92653]
+seed: 42
